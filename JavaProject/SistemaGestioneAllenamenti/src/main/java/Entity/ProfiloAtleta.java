@@ -3,7 +3,7 @@ package Entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
-@Embeddable // Dice a JPA che questa classe è "incorporabile" in un'altra entità (Atleta)
+@Embeddable
 public class ProfiloAtleta {
 
     @Column(name = "disciplina_praticata")
@@ -15,11 +15,9 @@ public class ProfiloAtleta {
     @Column(name = "obiettivi_sportivi", columnDefinition = "TEXT")
     private String obiettiviSportivi;
 
-    // =========================================================
     // COSTRUTTORI
-    // =========================================================
 
-    // 1. Costruttore vuoto obbligatorio per JPA
+    // 1. Costruttore vuoto obbligatorio
     protected ProfiloAtleta() {
     }
 
@@ -30,9 +28,7 @@ public class ProfiloAtleta {
         this.obiettiviSportivi = obiettiviSportivi;
     }
 
-    // =========================================================
     // METODI DI BUSINESS
-    // =========================================================
 
     public void aggiornaObiettivi(String nuoviObiettivi) {
         this.obiettiviSportivi = nuoviObiettivi;
@@ -46,16 +42,21 @@ public class ProfiloAtleta {
         this.disciplinaPraticata = nuovaDisciplina;
     }
 
-    // =========================================================
     // GETTER E SETTER
-    // =========================================================
 
-    public String getDisciplinaPraticata() { return disciplinaPraticata; }
-    public void setDisciplinaPraticata(String disciplinaPraticata) { this.disciplinaPraticata = disciplinaPraticata; }
+    public String getDisciplinaPraticata() {
+        return disciplinaPraticata; }
+    public void setDisciplinaPraticata(String disciplinaPraticata) {
+        this.disciplinaPraticata = disciplinaPraticata; }
 
-    public String getLivelloEsperienza() { return livelloEsperienza; }
-    public void setLivelloEsperienza(String livelloEsperienza) { this.livelloEsperienza = livelloEsperienza; }
+    public String getLivelloEsperienza() {
+        return livelloEsperienza; }
 
-    public String getObiettiviSportivi() { return obiettiviSportivi; }
-    public void setObiettiviSportivi(String obiettiviSportivi) { this.obiettiviSportivi = obiettiviSportivi; }
+    public void setLivelloEsperienza(String livelloEsperienza) {
+        this.livelloEsperienza = livelloEsperienza; }
+
+    public String getObiettiviSportivi() {
+        return obiettiviSportivi; }
+    public void setObiettiviSportivi(String obiettiviSportivi) {
+        this.obiettiviSportivi = obiettiviSportivi; }
 }
