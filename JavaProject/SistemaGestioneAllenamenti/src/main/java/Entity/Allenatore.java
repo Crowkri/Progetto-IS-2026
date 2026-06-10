@@ -21,11 +21,11 @@ public class Allenatore extends Utente {
     @OneToMany(mappedBy = "allenatoreAssociato", cascade = CascadeType.ALL)
     private List<Atleta> atletiAssociati;
 
-    // =========================================================
-    // COSTRUTTORI
-    // =========================================================
 
-    // 1. Costruttore vuoto obbligatorio per JPA
+    // COSTRUTTORI
+
+
+    // 1. Costruttore vuoto
     protected Allenatore() {
         super();
         this.atletiAssociati = new ArrayList<>();
@@ -46,9 +46,7 @@ public class Allenatore extends Utente {
         this.atletiAssociati = new ArrayList<>();
     }
 
-    // =========================================================
     // METODI
-    // =========================================================
 
     public boolean aggiungiAtleta(Atleta atleta) {
         if (!atletiAssociati.contains(atleta)) {

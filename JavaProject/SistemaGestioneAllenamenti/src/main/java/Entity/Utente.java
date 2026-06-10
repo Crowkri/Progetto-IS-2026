@@ -21,11 +21,9 @@ public abstract class Utente {
     @Column(name = "disciplina_prevalente")
     private String disciplinaPrevalente;
 
-    // =========================================================
     // COSTRUTTORI
-    // =========================================================
 
-    // 1. Costruttore vuoto obbligatorio per JPA
+    // 1. Costruttore vuoto
     protected Utente() {
     }
 
