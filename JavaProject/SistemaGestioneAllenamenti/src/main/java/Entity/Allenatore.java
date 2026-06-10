@@ -44,7 +44,7 @@ public class Allenatore extends Utente {
         this.idAllenatore = idAllenatore;
         this.codicePerAssociare = codicePerAssociare;
         this.atletiAssociati = new ArrayList<>();
-    } // <--- MANCAVA QUESTA PARENTESI GRAFFA QUI!
+    }
 
     // =========================================================
     // METODI
