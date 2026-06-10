@@ -23,9 +23,8 @@ public class Esercizio {
     @Column(name = "durata_prevista")
     private int durataPrevista; // in minuti
 
-    // =========================================================
-    // Attributi di performance (Prestazione) compilati dall'Atleta
-    // =========================================================
+    // Attributi delle SessioniAllenamento compilati dall'Atleta
+
     @Column(name = "ripetizioni_effettive")
     private int ripetizioniEffettive;
 
@@ -35,19 +34,16 @@ public class Esercizio {
     @Column(name = "nota_testuale", columnDefinition = "TEXT")
     private String notaTestuale;
 
-    // =========================================================
     // RELAZIONI
-    // =========================================================
     // Relazione Molti a 1: Molti Esercizi appartengono a 1 Sessione
+
     @ManyToOne
     @JoinColumn(name = "id_sessione")
     private SessioneAllenamento sessione;
 
-    // =========================================================
     // COSTRUTTORI
-    // =========================================================
 
-    // 1. Costruttore vuoto obbligatorio per JPA
+    // 1. Costruttore obbligatorio
     protected Esercizio() {
     }
 
@@ -59,7 +55,7 @@ public class Esercizio {
         this.durataPrevista = durataPrevista;
     }
 
-    // 3. Costruttore completo (con ID, utile per i test o ricaricamento)
+    // 3. Costruttore completo (con ID, per i test o ricaricamento)
     public Esercizio(Long idEsercizio, String nome, String descrizione, int ripetizioniPreviste, int durataPrevista) {
         this.idEsercizio = idEsercizio;
         this.nome = nome;
@@ -68,20 +64,15 @@ public class Esercizio {
         this.durataPrevista = durataPrevista;
     }
 
-    // =========================================================
     // METODI
-    // =========================================================
 
-    // Funzionalità richiesta dal requisito 12 (Registrazione risultati)
     public void registraEsecuzione(int ripetizioniEffettive, int tempoImpiegato, String notaTestuale) {
         this.ripetizioniEffettive = ripetizioniEffettive;
         this.tempoImpiegato = tempoImpiegato;
         this.notaTestuale = notaTestuale;
     }
 
-    // =========================================================
     // GETTER E SETTER
-    // =========================================================
 
     public Long getIdEsercizio() { return idEsercizio; }
 

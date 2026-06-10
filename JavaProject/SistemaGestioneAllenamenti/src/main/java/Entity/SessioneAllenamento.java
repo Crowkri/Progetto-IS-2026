@@ -31,9 +31,7 @@ public class SessioneAllenamento {
     @Column(name = "stato")
     private StatoSessione stato;
 
-    // =========================================================
-    // RELAZIONI
-    // =========================================================
+    // RELAZIONi
 
     // Relazione Molti a 1: Molte Sessioni appartengono a 1 Atleta
     @ManyToOne
@@ -41,16 +39,12 @@ public class SessioneAllenamento {
     private Atleta atleta;
 
     // Relazione 1 a Molti: 1 Sessione ha N Esercizi
-    // cascade = CascadeType.ALL e orphanRemoval = true assicurano che se eliminiamo
-    // la sessione o un esercizio dalla lista, le modifiche si riflettano sul DB
     @OneToMany(mappedBy = "sessione", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Esercizio> esercizi;
 
-    // =========================================================
     // COSTRUTTORI
-    // =========================================================
 
-    // 1. Costruttore vuoto obbligatorio per JPA
+    // 1. Costruttore vuoto obbligatorio
     protected SessioneAllenamento() {
         this.esercizi = new ArrayList<>();
     }
@@ -65,7 +59,7 @@ public class SessioneAllenamento {
         this.esercizi = new ArrayList<>();
     }
 
-    // 3. Costruttore completo (CON ID, utile per ricaricare i dati o i test)
+    // 3. Costruttore completo (CON ID, ricaricare i dati o i test)
     public SessioneAllenamento(Long idSessione, String titolo, String descrizione, int durataPrevista, Date dataSvolgimento) {
         this.idSessione = idSessione;
         this.titolo = titolo;
@@ -76,18 +70,16 @@ public class SessioneAllenamento {
         this.esercizi = new ArrayList<>();
     }
 
-    // =========================================================
     // METODI DI LOGICA E BUSINESS
-    // =========================================================
 
     public void aggiungiEsercizio(Esercizio esercizio) {
         this.esercizi.add(esercizio);
-        esercizio.setSessione(this); // Mantiene coerente la relazione bidirezionale in memoria
+        esercizio.setSessione(this);
     }
 
     public boolean rimuoviEsercizio(Esercizio esercizio) {
         if (this.esercizi.remove(esercizio)) {
-            esercizio.setSessione(null); // Rimuove il riferimento inverso
+            esercizio.setSessione(null);
             return true;
         }
         return false;
@@ -109,29 +101,40 @@ public class SessioneAllenamento {
         return totale;
     }
 
-    // =========================================================
     // GETTER E SETTER
-    // =========================================================
 
     public Long getIdSessione() { return idSessione; }
 
-    public String getTitolo() { return titolo; }
-    public void setTitolo(String titolo) { this.titolo = titolo; }
+    public String getTitolo() {
+        return titolo; }
+    public void setTitolo(String titolo) {
+        this.titolo = titolo; }
 
-    public String getDescrizione() { return descrizione; }
-    public void setDescrizione(String descrizione) { this.descrizione = descrizione; }
+    public String getDescrizione() {
+        return descrizione; }
+    public void setDescrizione(String descrizione) {
+        this.descrizione = descrizione; }
 
-    public int getDurataPrevista() { return durataPrevista; }
-    public void setDurataPrevista(int durataPrevista) { this.durataPrevista = durataPrevista; }
+    public int getDurataPrevista() {
+        return durataPrevista; }
+    public void setDurataPrevista(int durataPrevista) {
+        this.durataPrevista = durataPrevista; }
 
-    public Date getDataSvolgimento() { return dataSvolgimento; }
-    public void setDataSvolgimento(Date dataSvolgimento) { this.dataSvolgimento = dataSvolgimento; }
+    public Date getDataSvolgimento() {
+        return dataSvolgimento; }
+    public void setDataSvolgimento(Date dataSvolgimento) {
+        this.dataSvolgimento = dataSvolgimento; }
 
-    public StatoSessione getStato() { return stato; }
-    public void setStato(StatoSessione stato) { this.stato = stato; }
+    public StatoSessione getStato() {
+        return stato; }
+    public void setStato(StatoSessione stato) {
+        this.stato = stato; }
 
-    public List<Esercizio> getEsercizi() { return esercizi; }
+    public List<Esercizio> getEsercizi() {
+        return esercizi; }
 
-    public Atleta getAtleta() { return atleta; }
-    public void setAtleta(Atleta atleta) { this.atleta = atleta; }
+    public Atleta getAtleta() {
+        return atleta; }
+    public void setAtleta(Atleta atleta) {
+        this.atleta = atleta; }
 }
