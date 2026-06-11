@@ -1,119 +1,54 @@
 package Control;
 
-import java.util.List;
-import Entity.Allenatore;
-import Entity.Utente;
-import Database.GestorePersistenza;
 import Entity.Atleta;
-import Entity.ProfiloAtleta;
+import Entity.Utente;
+import Entity.Allenatore;
 
 public class GestoreUtenti {
 
-    // Riferimento al livello di persistenza (Database)
-    private GestorePersistenza db;
+    private AppSport facade;
 
-    public GestoreUtenti(GestorePersistenza db) {
-        this.db = db;
-    }
-    public Atleta registraAtleta(String nome, String cognome, String email, String password, String disciplina) {
-        Atleta nuovoAtleta = new Atleta(nome, cognome, email, password, disciplina);
-        db.salva(nuovoAtleta);
-        return nuovoAtleta;
+    public GestoreUtenti(AppSport facade) {
+        // Nessun accesso al database, si appoggia solo al Facade
+        this.facade = facade;
     }
 
-    public Allenatore registraAllenatore(String nome, String cognome, String email, String password, String disciplina, String codiceAssociazione) {
-        Allenatore nuovoAllenatore = new Allenatore(codiceAssociazione, nome, cognome, email, password, disciplina);
-        db.salva(nuovoAllenatore);
-        return nuovoAllenatore;
-    }
-
-    // CORREZIONE JPA: Non potendo interrogare la classe astratta, interroghiamo le tabelle figlie
     public Utente autenticaUtente(String email, String password) {
-
-        // 1. Cerchiamo prima tra gli Atleti
-        List<Atleta> atleti = db.cercaPerCampo(Atleta.class, "email", email);
-        if (atleti != null && !atleti.isEmpty()) {
-            Atleta atleta = atleti.get(0);
-            if (atleta.getPassword().equals(password)) {
-                return atleta;
-            }
+        // Validazione sintattica dell'input
+        if (email == null || email.isBlank() || password == null || password.isBlank()) {
+            throw new IllegalArgumentException("Credenziali non valide.");
         }
-
-        // 2. Se non è un atleta, cerchiamo tra gli Allenatori
-        List<Allenatore> allenatori = db.cercaPerCampo(Allenatore.class, "email", email);
-        if (allenatori != null && !allenatori.isEmpty()) {
-            Allenatore allenatore = allenatori.get(0);
-            if (allenatore.getPassword().equals(password)) {
-                return allenatore;
-            }
-        }
-
-        return null; // Credenziali errate o utente non trovato
+        return facade.autenticaUtente(email, password);
     }
 
-    // ========================================================================
-    // METODI DI ASSOCIAZIONE
-    // ========================================================================
-
-    public boolean associaConCodice(Atleta atleta, String codiceInserito) {
-        List<Allenatore> risultati = db.cercaPerCampo(Allenatore.class, "codicePerAssociare", codiceInserito);
-
-        if (risultati != null && !risultati.isEmpty()) {
-            Allenatore allenatore = risultati.get(0);
-
-            if (allenatore.aggiungiAtleta(atleta)) {
-                db.aggiorna(atleta); // L'atleta è il lato proprietario (Foreign Key)
-                db.aggiorna(allenatore);
-                return true;
-            }
+    public Atleta registraAtleta(String nome, String cognome, String email, String password, String disciplina, String codiceAssociazione) {
+        if (nome == null || email == null || !email.contains("@")) {
+            throw new IllegalArgumentException("Dati obbligatori mancanti o errati.");
         }
-        return false;
+        // Il controller delega tutta la complessità al Facade
+        return facade.registraAtleta(nome, cognome, email, password, disciplina, codiceAssociazione);
     }
 
-    public boolean associazioneDiretta(Allenatore allenatore, Long idAtleta) {
-        Atleta atleta = db.trovaPerId(Atleta.class, idAtleta);
 
-        if (atleta != null) {
-            if (allenatore.aggiungiAtleta(atleta)) {
-                db.aggiorna(atleta);
-                db.aggiorna(allenatore);
-                return true;
-            }
+    public void modificaProfiloAtleta(Long idAllenatore, Long idAtleta, String disciplina, String livelloEsperienza, String obiettiviSportivi) {
+        if (idAllenatore == null || idAtleta == null) {
+            throw new IllegalArgumentException("ID utenti mancanti.");
         }
-        return false;
+        facade.modificaProfiloAtleta(idAllenatore, idAtleta, disciplina, livelloEsperienza, obiettiviSportivi);
     }
-
-    // ========================================================================
-    // GESTIONE PROFILO ATLETA
-    // ========================================================================
-
-    public ProfiloAtleta getProfiloAtleta(Utente richiedente, Atleta atleta) {
-        if (atleta == null) return null;
-
-        if (richiedente.equals(atleta)) {
-            return atleta.getProfilo();
+    public Allenatore registraAllenatore(String nome, String cognome, String email, String password, String disciplina, String codiceAssociazione) {
+        // 1. Validazione sintattica e formale dell'input (Logica di Presentazione)
+        if (nome == null || nome.isBlank() || email == null || !email.contains("@")) {
+            throw new IllegalArgumentException("Dati anagrafici mancanti o formato email errato.");
+        }
+        if (password == null || password.length() < 6) {
+            throw new IllegalArgumentException("La password deve contenere almeno 6 caratteri.");
+        }
+        if (codiceAssociazione == null || codiceAssociazione.isBlank()) {
+            throw new IllegalArgumentException("Il codice univoco di associazione è obbligatorio per registrarsi come Allenatore.");
         }
 
-        if (richiedente instanceof Allenatore) {
-            Allenatore allenatore = (Allenatore) richiedente;
-            if (allenatore.haAtletaAssociato(atleta)) {
-                return atleta.getProfilo();
-            }
-        }
-
-        throw new SecurityException("Accesso negato: Non sei autorizzato a visualizzare questo profilo.");
-    }
-
-    public void modificaProfiloAtleta(Allenatore allenatore, Atleta atleta, String disciplina, String livelloEsperienza, String obiettiviSportivi) {
-
-        if (allenatore != null && atleta != null && allenatore.haAtletaAssociato(atleta)) {
-            // Crea l'oggetto @Embeddable e lo passa all'atleta
-            ProfiloAtleta nuovoProfilo = new ProfiloAtleta(disciplina, livelloEsperienza, obiettiviSportivi);
-            atleta.impostaProfilo(nuovoProfilo);
-
-            db.aggiorna(atleta);
-        } else {
-            throw new IllegalArgumentException("Errore di autorizzazione: L'atleta non è associato a questo allenatore.");
-        }
+        // 2. Delega dell'operazione vera e propria al Facade
+        return facade.registraAllenatore(nome, cognome, email, password, disciplina, codiceAssociazione);
     }
 }

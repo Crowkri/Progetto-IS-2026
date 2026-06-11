@@ -57,7 +57,7 @@ public class FormRegistrazione {
 
         try {
             if (ruolo.equals("Atleta")) {
-                gestoreUtenti.registraAtleta(nome, cognome, email, password, disciplina);
+                gestoreUtenti.registraAtleta(nome, cognome, email, password, disciplina,codice);
                 lblEsito.setText("Registrazione Atleta completata!");
                 lblEsito.setForeground(Color.GREEN);
             } else if (ruolo.equals("Allenatore")) {
