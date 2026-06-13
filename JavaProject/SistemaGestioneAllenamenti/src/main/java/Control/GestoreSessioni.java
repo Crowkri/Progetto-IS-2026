@@ -35,4 +35,6 @@ public class GestoreSessioni {
 
         facade.registraEsecuzioneEsercizio(idAtleta, idEsercizio, ripetizioniEffettive, tempoImpiegato, nota);
     }
+
+
 }

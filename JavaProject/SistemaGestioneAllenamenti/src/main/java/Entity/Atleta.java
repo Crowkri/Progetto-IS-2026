@@ -26,7 +26,7 @@ public class Atleta extends Utente {
 
     // Relazione 1 a Molti: 1 Atleta ha N Sessioni
     // orphanRemoval = true significa che se togliamo una sessione dalla lista, viene cancellata dal DB
-    @OneToMany(mappedBy = "atleta", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "atleta", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<SessioneAllenamento> sessioniAllenamento;
 
     // COSTRUTTORI

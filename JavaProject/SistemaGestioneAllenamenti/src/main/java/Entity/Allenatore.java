@@ -18,7 +18,7 @@ public class Allenatore extends Utente {
 
     // Relazione 1 a Molti: 1 Allenatore ha N Atleti.
     // 'mappedBy' significa che la chiave esterna sta nell'Atleta (nella variabile chiamata "allenatoreAssociato")
-    @OneToMany(mappedBy = "allenatoreAssociato", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "allenatoreAssociato",fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Atleta> atletiAssociati;
 
 

@@ -1,5 +1,10 @@
 package Boundary;
 
+import Control.AppSport;
+import Control.GestoreUtenti;
+import Entity.Allenatore;
+import Entity.Atleta;
+import Entity.Utente;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
@@ -17,7 +22,13 @@ public class FormLogin {
     private JButton btnLogin;
     private JLabel lblEsito;
 
-    public FormLogin() {
+    // Riferimento al Use Case Controller
+    private GestoreUtenti gestoreUtenti;
+
+    // Il costruttore ora richiede il GestoreUtenti
+    public FormLogin(GestoreUtenti gestoreUtenti) {
+        this.gestoreUtenti = gestoreUtenti;
+
         btnLogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -27,37 +38,80 @@ public class FormLogin {
     }
 
     private void effettuaLogin() {
-        // Corretto: ora prende il testo da txtEmail
-        String email = txtEmail.getText();
+        String email = txtEmail.getText().trim();
         String password = new String(txtPassword.getPassword());
 
-        // Validazione Boundary
+        // 1. Validazione formale della Boundary
         if (email.isEmpty() || password.isEmpty()) {
             lblEsito.setText("Errore: compila tutti i campi.");
             lblEsito.setForeground(Color.RED);
             return;
         }
 
-        // Qui chiamerai il tuo Controller (es. AuthControllerStub.login(email, password))
-        // Per ora simuliamo un esito positivo
-        boolean esito = true;
+        try {
+            // 2. Delega l'autenticazione al controller
+            Utente utenteLoggato = gestoreUtenti.autenticaUtente(email, password);
 
-        if (esito) {
-            lblEsito.setText("Login effettuato con successo!");
-            lblEsito.setForeground(Color.GREEN);
-        } else {
-            lblEsito.setText("Credenziali errate.");
+            if (utenteLoggato != null) {
+                // Il login ha avuto successo. Controlliamo il tipo per la UX
+                if (utenteLoggato instanceof Atleta) {
+                    lblEsito.setText("Login Atleta riuscito! Benvenuto " + utenteLoggato.getNome());
+                    lblEsito.setForeground(Color.GREEN);
+
+                    // TODO: Qui aprirai la GuiHomeAtleta passando l'atleta o il suo ID
+                    lblEsito.setText("Login Atleta riuscito!");
+                    lblEsito.setForeground(Color.GREEN);
+
+                    // 1. Crea la nuova interfaccia dell'atleta passando l'entità castata
+                    GuiHomeAtleta homeAtleta = new GuiHomeAtleta((Atleta) utenteLoggato);
+                    homeAtleta.setVisible(true); // La rende visibile
+
+                    // 2. Chiude la finestra di login attuale
+                    SwingUtilities.getWindowAncestor(contentPane).dispose();
+
+                } else if (utenteLoggato instanceof Allenatore) {
+                    lblEsito.setText("Login Allenatore riuscito! Benvenuto Coach " + utenteLoggato.getNome());
+                    lblEsito.setForeground(Color.GREEN);
+
+                    // TODO: Qui aprirai la GuiHomeAllenatore
+
+                    lblEsito.setText("Login Allenatore riuscito!");
+                    lblEsito.setForeground(Color.GREEN);
+
+                    // 1. Crea la nuova interfaccia del coach passando l'entità castata
+                    GuiHomeAllenatore homeAllenatore = new GuiHomeAllenatore((Allenatore) utenteLoggato);
+                    homeAllenatore.setVisible(true);
+
+                    // 2. Chiude la finestra di login attuale
+                    SwingUtilities.getWindowAncestor(contentPane).dispose();
+
+                }
+            } else {
+                // Il Facade ha restituito null (utente non trovato o password errata)
+                lblEsito.setText("Errore: Credenziali errate.");
+                lblEsito.setForeground(Color.RED);
+            }
+        } catch (Exception ex) {
+            // Intercetta eventuali eccezioni di validazione del controller
+            lblEsito.setText("Errore: " + ex.getMessage());
             lblEsito.setForeground(Color.RED);
         }
     }
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Accesso Sistema Allenamenti");
-        frame.setContentPane(new FormLogin().contentPane);
+
+        // Configurazione dell'architettura per il test autonomo della schermata
+        AppSport facade = new AppSport();
+        GestoreUtenti controller = new GestoreUtenti(facade);
+
+        // Passiamo il controller reale al modulo di login
+        frame.setContentPane(new FormLogin(controller).contentPane);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+
     }
 
     {
@@ -76,23 +130,29 @@ public class FormLogin {
      */
     private void $$$setupUI$$$() {
         contentPane = new JPanel();
-        contentPane.setLayout(new GridLayoutManager(5, 2, new Insets(0, 0, 0, 0), -1, -1));
+        contentPane.setLayout(new GridLayoutManager(5, 3, new Insets(0, 0, 0, 0), -1, -1));
         contentPane.setBorder(BorderFactory.createTitledBorder(null, "", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         txtEmail = new JTextField();
         txtEmail.setText("");
-        contentPane.add(txtEmail, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        contentPane.add(txtEmail, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final Spacer spacer1 = new Spacer();
-        contentPane.add(spacer1, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        contentPane.add(spacer1, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
-        contentPane.add(spacer2, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        contentPane.add(spacer2, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         txtPassword = new JPasswordField();
-        contentPane.add(txtPassword, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        contentPane.add(txtPassword, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         btnLogin = new JButton();
-        btnLogin.setText("Button");
-        contentPane.add(btnLogin, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        btnLogin.setText("Accedi");
+        contentPane.add(btnLogin, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         lblEsito = new JLabel();
-        lblEsito.setText("esito");
-        contentPane.add(lblEsito, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        lblEsito.setText("");
+        contentPane.add(lblEsito, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label1 = new JLabel();
+        label1.setText("Email:");
+        contentPane.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label2 = new JLabel();
+        label2.setText("Password:");
+        contentPane.add(label2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**
