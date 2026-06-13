@@ -4,6 +4,8 @@ import Entity.Atleta;
 import Entity.Utente;
 import Entity.Allenatore;
 
+import java.util.List;
+
 public class GestoreUtenti {
 
     private AppSport facade;
@@ -50,5 +52,22 @@ public class GestoreUtenti {
 
         // 2. Delega dell'operazione vera e propria al Facade
         return facade.registraAllenatore(nome, cognome, email, password, disciplina, codiceAssociazione);
+    }
+    public boolean esisteCodiceAllenatore(String codice) {
+        // Controllo di sicurezza preliminare sul parametro
+        if (codice == null || codice.trim().isEmpty()) {
+            return false;
+        }
+        // Delega alla Facade
+        return facade.esisteCodiceAllenatore(codice.trim());
+    }
+    public List<Atleta> getAtletiAssociati(Long idAllenatore) {
+        // Validazione base
+        if (idAllenatore == null) {
+            throw new IllegalArgumentException("Errore: ID Allenatore non fornito.");
+        }
+
+        // Delega al Facade
+        return facade.getAtletiAssociati(idAllenatore);
     }
 }

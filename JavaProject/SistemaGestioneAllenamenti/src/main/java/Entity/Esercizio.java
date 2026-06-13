@@ -18,18 +18,18 @@ public class Esercizio {
     private String descrizione;
 
     @Column(name = "ripetizioni_previste")
-    private int ripetizioniPreviste;
+    private Integer ripetizioniPreviste;
 
     @Column(name = "durata_prevista")
-    private int durataPrevista; // in minuti
+    private Integer durataPrevista; // in minuti
 
     // Attributi delle SessioniAllenamento compilati dall'Atleta
 
     @Column(name = "ripetizioni_effettive")
-    private int ripetizioniEffettive;
+    private Integer ripetizioniEffettive;
 
     @Column(name = "tempo_impiegato")
-    private int tempoImpiegato;
+    private Integer tempoImpiegato;
 
     @Column(name = "nota_testuale", columnDefinition = "TEXT")
     private String notaTestuale;

@@ -39,7 +39,7 @@ public class SessioneAllenamento {
     private Atleta atleta;
 
     // Relazione 1 a Molti: 1 Sessione ha N Esercizi
-    @OneToMany(mappedBy = "sessione", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "sessione", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
     private List<Esercizio> esercizi;
 
     // COSTRUTTORI
