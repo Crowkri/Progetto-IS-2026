@@ -58,7 +58,6 @@ public class FormLogin {
                     lblEsito.setText("Login Atleta riuscito! Benvenuto " + utenteLoggato.getNome());
                     lblEsito.setForeground(Color.GREEN);
 
-                    // TODO: Qui aprirai la GuiHomeAtleta passando l'atleta o il suo ID
                     lblEsito.setText("Login Atleta riuscito!");
                     lblEsito.setForeground(Color.GREEN);
 
@@ -73,7 +72,6 @@ public class FormLogin {
                     lblEsito.setText("Login Allenatore riuscito! Benvenuto Coach " + utenteLoggato.getNome());
                     lblEsito.setForeground(Color.GREEN);
 
-                    // TODO: Qui aprirai la GuiHomeAllenatore
 
                     lblEsito.setText("Login Allenatore riuscito!");
                     lblEsito.setForeground(Color.GREEN);

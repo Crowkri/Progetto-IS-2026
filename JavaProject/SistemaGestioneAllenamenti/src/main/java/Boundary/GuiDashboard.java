@@ -2,22 +2,19 @@ package Boundary;
 
 import Control.AppSport;
 import Control.GestoreDashboard;
+import Control.GestoreUtenti;
 import Entity.Allenatore;
 import Entity.Atleta;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.intellij.uiDesigner.core.Spacer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Date;
 import java.util.Map;
 
 public class GuiDashboard extends JFrame {
 
-    // --- FIELD NAMES ---
     private JPanel mainPanel;
     private JLabel lblTotAtleti;
     private JLabel lblAssegnate;
@@ -30,10 +27,14 @@ public class GuiDashboard extends JFrame {
 
     private Allenatore allenatoreLoggato;
     private GestoreDashboard gestoreDashboard;
+    private GestoreUtenti gestoreUtenti;
 
     public GuiDashboard(Allenatore allenatore) {
         this.allenatoreLoggato = allenatore;
-        this.gestoreDashboard = new GestoreDashboard(new AppSport());
+
+        AppSport facade = new AppSport();
+        this.gestoreDashboard = new GestoreDashboard(facade);
+        this.gestoreUtenti = new GestoreUtenti(facade);
 
         setTitle("Dashboard Monitoraggio Performance");
         setContentPane(mainPanel);
@@ -46,7 +47,6 @@ public class GuiDashboard extends JFrame {
     }
 
     private void inizializzaDati() {
-        // 1. Carica indicatori aggregati
         try {
             Map<String, Integer> indicatori = gestoreDashboard.getIndicatoriAggregati(allenatoreLoggato.getIdAllenatore());
             lblTotAtleti.setText("Atleti: " + indicatori.getOrDefault("Totale Atleti", 0));
@@ -57,48 +57,86 @@ public class GuiDashboard extends JFrame {
             lblTotAtleti.setText("Errore dati");
         }
 
-        // 2. Popola combo box atleti
         cmbAtleti.addItem("Seleziona un atleta...");
-        for (Atleta a : allenatoreLoggato.getAtletiAssociati()) {
-            cmbAtleti.addItem(a.getIdAtleta() + " - " + a.getNome() + " " + a.getCognome());
+        try {
+            java.util.List<Atleta> atletiAssociati = gestoreUtenti.getAtletiAssociati(allenatoreLoggato.getIdAllenatore());
+            for (Atleta a : atletiAssociati) {
+                cmbAtleti.addItem(a.getIdAtleta() + " - " + a.getNome() + " " + a.getCognome());
+            }
+        } catch (Exception e) {
+            System.err.println("Errore nel caricamento tendina: " + e.getMessage());
         }
     }
 
     private void gestisciEventi() {
-        // Listener per Profilo
-        btnVisualizzaProfilo.setText("Visualizza Profilo");
         btnVisualizzaProfilo.addActionListener(e -> {
             Long idAtleta = getSelectedAtletaId();
             if (idAtleta != null) {
-                // TODO: new GuiProfiloAtleta(idAtleta).setVisible(true);
-                JOptionPane.showMessageDialog(mainPanel, "Apertura profilo atleta ID: " + idAtleta);
-            }
-        });
-
-        // Listener per Evoluzione
-        btnVisualizzaEvoluzione.setText("Visualizza Evoluzione");
-        btnVisualizzaEvoluzione.addActionListener(e -> {
-            Long idAtleta = getSelectedAtletaId();
-            if (idAtleta != null) {
                 try {
-                    Map<Date, Integer> evoluzione = gestoreDashboard.getEvoluzioneAtleta(allenatoreLoggato.getIdAllenatore(), idAtleta);
-                    JOptionPane.showMessageDialog(mainPanel, "Storico evolutivo caricato: " + evoluzione.size() + " date trovate.");
-                } catch (IllegalStateException ex) {
-                    JOptionPane.showMessageDialog(mainPanel, ex.getMessage(), "Attenzione", JOptionPane.WARNING_MESSAGE);
+                    java.util.List<Atleta> atletiAssociati = gestoreUtenti.getAtletiAssociati(allenatoreLoggato.getIdAllenatore());
+                    Atleta atletaSelezionato = null;
+                    for (Atleta a : atletiAssociati) {
+                        if (a.getIdAtleta().equals(idAtleta)) {
+                            atletaSelezionato = a;
+                            break;
+                        }
+                    }
+                    if (atletaSelezionato != null) {
+                        new GuiProfiloAtleta(atletaSelezionato, allenatoreLoggato).setVisible(true);
+                    } else {
+                        JOptionPane.showMessageDialog(mainPanel, "Errore: Atleta non trovato.", "Errore", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(mainPanel, "Errore di sistema: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
 
-        // Listener per Confronto
-        btnVisualizzaConfronto.setText("Confronto Dati");
+        btnVisualizzaEvoluzione.addActionListener(e -> {
+            Long idAtleta = getSelectedAtletaId();
+            if (idAtleta != null) {
+                try {
+                    java.util.List<Atleta> atletiAssociati = gestoreUtenti.getAtletiAssociati(allenatoreLoggato.getIdAllenatore());
+                    Atleta atletaSelezionato = null;
+                    for (Atleta a : atletiAssociati) {
+                        if (a.getIdAtleta().equals(idAtleta)) {
+                            atletaSelezionato = a;
+                            break;
+                        }
+                    }
+                    if (atletaSelezionato != null) {
+                        Map<Date, Integer> evoluzione = gestoreDashboard.getEvoluzioneAtleta(allenatoreLoggato.getIdAllenatore(), idAtleta);
+                        new GuiEvoluzione(atletaSelezionato, evoluzione).setVisible(true);
+                    } else {
+                        JOptionPane.showMessageDialog(mainPanel, "Errore: Atleta non trovato nel sistema.", "Errore", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (IllegalStateException ex) {
+                    JOptionPane.showMessageDialog(mainPanel, ex.getMessage(), "Attenzione", JOptionPane.WARNING_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(mainPanel, "Errore nel caricamento: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
         btnVisualizzaConfronto.addActionListener(e -> {
             Long idAtleta = getSelectedAtletaId();
             if (idAtleta != null) {
                 try {
-                    Map<String, Double> confronto = gestoreDashboard.generaConfrontoPrevistoEffettivo(allenatoreLoggato.getIdAllenatore(), idAtleta);
-                    String msg = "Confronto:\n" + confronto.toString();
-                    JOptionPane.showMessageDialog(mainPanel, msg);
-                } catch (IllegalStateException ex) {
+                    java.util.List<Atleta> atletiAssociati = gestoreUtenti.getAtletiAssociati(allenatoreLoggato.getIdAllenatore());
+                    Atleta atletaSelezionato = null;
+                    for (Atleta a : atletiAssociati) {
+                        if (a.getIdAtleta().equals(idAtleta)) {
+                            atletaSelezionato = a;
+                            break;
+                        }
+                    }
+                    if (atletaSelezionato != null) {
+                        Map<String, Double> confronto = gestoreDashboard.generaConfrontoPrevistoEffettivo(allenatoreLoggato.getIdAllenatore(), idAtleta);
+                        new GuiConfronto(atletaSelezionato, confronto).setVisible(true);
+                    } else {
+                        JOptionPane.showMessageDialog(mainPanel, "Errore: Impossibile recuperare i dati dell'atleta.", "Errore", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (IllegalArgumentException | IllegalStateException ex) {
                     JOptionPane.showMessageDialog(mainPanel, ex.getMessage(), "Attenzione", JOptionPane.WARNING_MESSAGE);
                 }
             }
@@ -146,13 +184,13 @@ public class GuiDashboard extends JFrame {
         cmbAtleti = new JComboBox();
         mainPanel.add(cmbAtleti, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         btnVisualizzaProfilo = new JButton();
-        btnVisualizzaProfilo.setText("Button");
+        btnVisualizzaProfilo.setText("Visualizza profilo");
         mainPanel.add(btnVisualizzaProfilo, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         btnVisualizzaEvoluzione = new JButton();
-        btnVisualizzaEvoluzione.setText("Button");
+        btnVisualizzaEvoluzione.setText("Visualizza evoluzione");
         mainPanel.add(btnVisualizzaEvoluzione, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         btnVisualizzaConfronto = new JButton();
-        btnVisualizzaConfronto.setText("Button");
+        btnVisualizzaConfronto.setText("Visualizza confronto");
         mainPanel.add(btnVisualizzaConfronto, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 

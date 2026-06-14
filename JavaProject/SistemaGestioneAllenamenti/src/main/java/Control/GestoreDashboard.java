@@ -21,7 +21,7 @@ public class GestoreDashboard {
 
         Map<String, Integer> indicatori = facade.getIndicatoriAggregati(idAllenatore);
 
-        // Flusso alternativo Punto 3: Se non ci sono atleti associati
+        // Flusso alternativo Se non ci sono atleti associati
         if (indicatori == null || indicatori.isEmpty()) {
             throw new IllegalStateException("Nessun atleta associato. Impossibile mostrare la dashboard.");
         }
@@ -61,11 +61,5 @@ public class GestoreDashboard {
         return confronto;
     }
 
-    // Metodo di utilità per recuperare le sessioni
-    public List<SessioneAllenamento> getSessioniAtletiAssociati(Long idAllenatore) {
-        if (idAllenatore == null) {
-            throw new IllegalArgumentException("ID Allenatore non valido.");
-        }
-        return facade.getSessioniAtletiAssociati(idAllenatore);
-    }
+
 }

@@ -70,4 +70,20 @@ public class GestoreUtenti {
         // Delega al Facade
         return facade.getAtletiAssociati(idAllenatore);
     }
+    public Allenatore associaConCodice(Long idAtleta, String codice) {
+        return facade.associaConCodice(idAtleta, codice);
+    }
+    public boolean associazioneDiretta(Long idAllenatore, Long idAtleta) {
+        try {
+            return facade.associazioneDiretta(idAllenatore, idAtleta);
+        } catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+            throw e;
+        }
+    }
+
+    public void dissociaAllenatore(Long idAtleta) {
+        facade.dissociaAllenatore(idAtleta);
+    }
+
 }

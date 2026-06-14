@@ -1,7 +1,7 @@
 package Control;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+
 import Database.GestorePersistenza;
 import Entity.Allenatore;
 import Entity.Atleta;
@@ -10,9 +10,8 @@ import Entity.ProfiloAtleta;
 import Entity.SessioneAllenamento;
 import Entity.Utente;
 import Entity.StatoSessione;
-import java.util.Map;
-import java.util.Date;
-import java.util.List;
+
+import java.util.stream.Collectors;
 
 public class AppSport {
 
@@ -78,6 +77,84 @@ public class AppSport {
             throw new IllegalArgumentException("Autorizzazione negata o utenti inesistenti.");
         }
     }
+    public Allenatore associaConCodice(Long idAtleta, String codice) {
+        if (codice == null || codice.trim().isEmpty()) {
+            return null; // Codice non valido
+        }
+
+        // 1. Recuperiamo l'atleta dal DB
+        Atleta atleta = db.trovaPerId(Atleta.class, idAtleta);
+        if (atleta == null) {
+            throw new IllegalArgumentException("Atleta non trovato nel sistema.");
+        }
+
+        // 2. Cerchiamo l'allenatore tramite il codice associativo
+        List<Allenatore> allenatori = db.cercaPerCampo(Allenatore.class, "codicePerAssociare", codice.trim());
+
+        if (allenatori != null && !allenatori.isEmpty()) {
+            Allenatore allenatore = allenatori.get(0);
+
+            // 3. Sfruttiamo il tuo metodo dell'entità che gestisce già il legame bidirezionale
+            boolean associato = allenatore.aggiungiAtleta(atleta);
+
+            if (associato) {
+                // 4. Salviamo i cambiamenti nel Database
+                db.aggiorna(allenatore);
+                db.aggiorna(atleta);
+            }
+
+            return allenatore;
+        }
+
+        return null; // Nessun allenatore trovato con questo codice
+    }
+    public boolean associazioneDiretta(Long idAllenatore, Long idAtleta) {
+        if (idAllenatore == null || idAtleta == null) {
+            return false;
+        }
+
+        // 1. Recupero le due entità dal Database
+        Allenatore allenatore = db.trovaPerId(Allenatore.class, idAllenatore);
+        Atleta atleta = db.trovaPerId(Atleta.class, idAtleta);
+
+        if (allenatore == null) {
+            throw new IllegalArgumentException("Errore: Allenatore non trovato nel sistema.");
+        }
+        if (atleta == null) {
+            throw new IllegalArgumentException("Errore: Nessun atleta trovato con questo ID.");
+        }
+
+        // 2. Sfruttiamo il metodo bidirezionale dell'entità Allenatore
+        boolean associato = allenatore.aggiungiAtleta(atleta);
+
+        // 3. Se l'aggiunta ha successo (ovvero non erano già collegati) salviamo sul DB
+        if (associato) {
+            db.aggiorna(allenatore);
+            db.aggiorna(atleta);
+            return true;
+        }
+
+        // Ritorna false se l'atleta era già presente nella lista dell'allenatore
+        return false;
+    }
+
+
+    public void dissociaAllenatore(Long idAtleta) {
+        Atleta atleta = db.trovaPerId(Atleta.class, idAtleta);
+
+        if (atleta != null) {
+            // Se l'atleta ha effettivamente un allenatore associato
+            Allenatore allenatoreAttuale = atleta.getAllenatoreAssociato();
+
+            if (allenatoreAttuale != null) {
+                allenatoreAttuale.rimuoviAtleta(atleta);
+
+                // Aggiorniamo le modifiche sul DB
+                db.aggiorna(allenatoreAttuale);
+                db.aggiorna(atleta);
+            }
+        }
+    }
 
 
     // METODI PER GESTORE SESSIONI
@@ -125,6 +202,13 @@ public class AppSport {
         }
         return null;
     }
+    public SessioneAllenamento getSessioneById(Long idSessione) {
+        if (idSessione == null) {
+            return null;
+        }
+        // Sostituisci 'db' con il nome della tua variabile interna al Facade per il GestorePersistenza/EntityManager
+        return db.trovaPerId(SessioneAllenamento.class, idSessione);
+    }
 
     public void aggiungiEsercizioASessione(Long idAllenatore, Long idSessione, String nome, String descrizione, int ripetizioniPreviste, int durataPrevista) {
         SessioneAllenamento sessione = db.trovaPerId(SessioneAllenamento.class, idSessione);
@@ -145,6 +229,18 @@ public class AppSport {
             esercizio.registraEsecuzione(ripetizioniEffettive, tempoImpiegato, nota);
             db.aggiorna(esercizio);
         }
+    }
+    public List<Esercizio> getEserciziSessione(Long idSessione) {
+        // 1. Recuperiamo la sessione dal database tramite il suo ID
+        SessioneAllenamento sessione = db.trovaPerId(SessioneAllenamento.class, idSessione);
+
+        if (sessione != null) {
+            // 2. Usiamo il getter che hai appena definito nell'entità Sessione
+            return sessione.getEsercizi();
+        }
+
+        // Se la sessione non esiste, ritorniamo una lista vuota per evitare NullPointerException
+        return new ArrayList<>();
     }
 
     public boolean esisteCodiceAllenatore(String codice) {
@@ -279,5 +375,54 @@ public class AppSport {
             }
         }
         return tutteLeSessioni;
+    }
+
+    // Recupera tutte le sessioni associate a un singolo atleta
+    public List<SessioneAllenamento> getSessioniAtleta(Long idAtleta) {
+        Atleta atleta = db.trovaPerId(Atleta.class, idAtleta);
+
+        if (atleta != null) {
+            // Restituisce la lista completa delle sessioni dell'atleta.
+            // (Il filtro per stato verrà poi applicato dalla GUI o dal Controller)
+            return atleta.getSessioniAllenamento();
+        }
+
+        return new java.util.ArrayList<>(); // Ritorna lista vuota se l'atleta non esiste
+    }
+    public List<SessioneAllenamento> filtraSessioniAtleta(Long idAtleta, String stato, String keywordTitolo, Date dataEsatta) {
+        Atleta atleta = db.trovaPerId(Atleta.class, idAtleta);
+
+        if (atleta == null) {
+            return new java.util.ArrayList<>();
+        }
+
+        List<SessioneAllenamento> tutteLeSessioni = atleta.getSessioniAllenamento();
+
+        // Usa gli Stream di Java per un filtraggio elegante e pulito
+        return tutteLeSessioni.stream()
+                // Filtro 1: Stato (ignora se null o se vale "Tutte le sessioni")
+                .filter(s -> stato == null || stato.equals("Tutte le sessioni") || s.getStato().equalsIgnoreCase(stato))
+
+                // Filtro 2: Titolo (ignora se null o vuoto)
+                .filter(s -> keywordTitolo == null || keywordTitolo.trim().isEmpty() ||
+                        (s.getTitolo() != null && s.getTitolo().toLowerCase().contains(keywordTitolo.trim().toLowerCase())))
+
+                // Filtro 3: Data (ignora se null) - Attenzione: confronta usando metodi sicuri per le date
+                .filter(s -> dataEsatta == null ||
+                        (s.getDataSvolgimento() != null && isStessoGiorno(s.getDataSvolgimento(), dataEsatta)))
+
+                // Raccoglie i risultati finali in una nuova lista
+                .collect(Collectors.toList());
+    }
+
+    // Metodo di supporto (privato) per confrontare se due date sono lo stesso giorno
+    // ignorando ore/minuti/secondi
+    private boolean isStessoGiorno(Date data1, Date data2) {
+        java.util.Calendar cal1 = java.util.Calendar.getInstance();
+        java.util.Calendar cal2 = java.util.Calendar.getInstance();
+        cal1.setTime(data1);
+        cal2.setTime(data2);
+        return cal1.get(java.util.Calendar.YEAR) == cal2.get(java.util.Calendar.YEAR) &&
+                cal1.get(java.util.Calendar.DAY_OF_YEAR) == cal2.get(java.util.Calendar.DAY_OF_YEAR);
     }
 }
