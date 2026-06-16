@@ -74,8 +74,19 @@ public class GuiHomeAllenatore extends JFrame {
         btnAtletiAssociati.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(mainPanel, "Apertura lista Atleti Associati...");
-                // TODO: new GuiAtletiAssociati(allenatoreLoggato).setVisible(true);
+
+                try {
+                    // 2. Istanziamo la nuova interfaccia passando l'oggetto allenatore attualmente loggato
+                    GuiAtletiAssociati guiAtleti = new GuiAtletiAssociati(allenatoreLoggato);
+
+                    guiAtleti.setVisible(true);
+
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(mainPanel,
+                            "Errore durante l'apertura della gestione atleti: " + ex.getMessage(),
+                            "Errore",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
     }

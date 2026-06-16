@@ -254,12 +254,18 @@ public class GuiHomeAtleta extends JFrame {
 
                 if (codice != null && !codice.trim().isEmpty()) {
                     try {
-                        // Chiamata al metodo corretto del GestoreUtenti
                         Allenatore nuovoCoach = gestoreUtenti.associaConCodice(atletaLoggato.getIdAtleta(), codice.trim());
-
+                        // NOTA ARCHITETTURALE (Pattern BCED & Session Management):
+// Viene invocato esplicitamente 'atletaLoggato.associaAllenatore()' all'interno della Boundary
+// poiché l'oggetto 'atletaLoggato' agisce come State Holder (Sessione Locale) dell'interfaccia.
+// Sebbene l'associazione venga interamente persistita sul Database dal Controller (GestoreUtenti)
+// tramite la Facade, l'istanza in memoria della GUI rimarrebbe disallineata.
+// Questa chiamata esplicita sincronizza lo stato della memoria locale dell'interfaccia grafica
+// in tempo reale, evitando una query di "refresh" ridondante verso il database per ricaricare l'entità.
                         if (nuovoCoach != null) {
                             atletaLoggato.associaAllenatore(nuovoCoach);
                             JOptionPane.showMessageDialog(mainPanel, "Associazione completata!");
+
                         } else {
                             JOptionPane.showMessageDialog(mainPanel, "Codice non valido.");
                         }
