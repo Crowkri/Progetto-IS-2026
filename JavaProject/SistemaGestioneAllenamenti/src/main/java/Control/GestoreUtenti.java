@@ -1,5 +1,6 @@
 package Control;
 
+import Entity.AppSport;
 import Entity.Atleta;
 import Entity.Utente;
 import Entity.Allenatore;

@@ -1,15 +1,8 @@
-package Control;
+package Entity;
 
 import java.util.*;
 
 import Database.GestorePersistenza;
-import Entity.Allenatore;
-import Entity.Atleta;
-import Entity.Esercizio;
-import Entity.ProfiloAtleta;
-import Entity.SessioneAllenamento;
-import Entity.Utente;
-import Entity.StatoSessione;
 
 import java.util.stream.Collectors;
 

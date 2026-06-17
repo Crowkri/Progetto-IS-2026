@@ -1,6 +1,6 @@
 package Boundary;
 
-import Control.AppSport;
+import Entity.AppSport;
 import Control.GestoreDashboard;
 import Control.GestoreUtenti;
 import Entity.Allenatore;

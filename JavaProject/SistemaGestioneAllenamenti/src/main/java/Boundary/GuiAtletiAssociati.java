@@ -1,6 +1,6 @@
 package Boundary;
 
-import Control.AppSport;
+import Entity.AppSport;
 import Control.GestoreUtenti;
 import Entity.Allenatore;
 import Entity.Atleta;
@@ -169,10 +169,10 @@ public class GuiAtletiAssociati extends JFrame {
         lblInfoCoach.setText("Label");
         mainPanel.add(lblInfoCoach, new GridConstraints(2, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         btnAggiungiAtleta = new JButton();
-        btnAggiungiAtleta.setText("Button");
+        btnAggiungiAtleta.setText("Associa");
         mainPanel.add(btnAggiungiAtleta, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         btnDissociaAtleta = new JButton();
-        btnDissociaAtleta.setText("Button");
+        btnDissociaAtleta.setText("Dissocia");
         mainPanel.add(btnDissociaAtleta, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
@@ -182,4 +182,5 @@ public class GuiAtletiAssociati extends JFrame {
     public JComponent $$$getRootComponent$$$() {
         return mainPanel;
     }
+
 }
