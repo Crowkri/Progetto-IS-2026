@@ -169,6 +169,7 @@ public class AppSport {
         }
         return null;
     }
+
     public SessioneAllenamento getSessioneById(Long idSessione) {
         if (idSessione == null) {
             return null;
