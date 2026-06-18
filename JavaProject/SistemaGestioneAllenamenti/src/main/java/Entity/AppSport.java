@@ -11,12 +11,9 @@ public class AppSport {
     private GestorePersistenza db;
 
     public AppSport() {
-        // Il Facade inizializza e gestisce il livello di persistenza
         this.db = new GestorePersistenza();
     }
 
-
-    // METODI PER GESTORE UTENTI
 
     public Utente autenticaUtente(String email, String password) {
         List<Atleta> atleti = db.cercaPerCampo(Atleta.class, "email", email);
@@ -35,7 +32,7 @@ public class AppSport {
         Atleta nuovoAtleta = new Atleta(nome, cognome, email, password, disciplina);
         db.salva(nuovoAtleta);
 
-        // Logica di business: associazione immediata se codice presente
+        // Associazione immediata se codice presente
         if (codiceAssociazione != null && !codiceAssociazione.isEmpty()) {
             List<Allenatore> allenatori = db.cercaPerCampo(Allenatore.class, "codicePerAssociare", codiceAssociazione);
             if (allenatori != null && !allenatori.isEmpty()) {
@@ -50,7 +47,6 @@ public class AppSport {
     }
 
     public Allenatore registraAllenatore(String nome, String cognome, String email, String password, String disciplina, String codiceAssociazione) {
-        // Creazione dell'entità e salvataggio diretto (logica di business/persistenza)
         Allenatore nuovoAllenatore = new Allenatore(codiceAssociazione, nome, cognome, email, password, disciplina);
         db.salva(nuovoAllenatore);
 
@@ -61,7 +57,6 @@ public class AppSport {
         Allenatore allenatore = db.trovaPerId(Allenatore.class, idAllenatore);
         Atleta atleta = db.trovaPerId(Atleta.class, idAtleta);
 
-        // Controllo logica di dominio
         if (allenatore != null && atleta != null && allenatore.haAtletaAssociato(atleta)) {
             ProfiloAtleta nuovoProfilo = new ProfiloAtleta(disciplina, livelloEsperienza, obiettiviSportivi);
             atleta.impostaProfilo(nuovoProfilo);
@@ -72,26 +67,22 @@ public class AppSport {
     }
     public Allenatore associaConCodice(Long idAtleta, String codice) {
         if (codice == null || codice.trim().isEmpty()) {
-            return null; // Codice non valido
+            return null;
         }
 
-        // 1. Recuperiamo l'atleta dal DB
         Atleta atleta = db.trovaPerId(Atleta.class, idAtleta);
         if (atleta == null) {
             throw new IllegalArgumentException("Atleta non trovato nel sistema.");
         }
 
-        // 2. Cerchiamo l'allenatore tramite il codice associativo
         List<Allenatore> allenatori = db.cercaPerCampo(Allenatore.class, "codicePerAssociare", codice.trim());
 
         if (allenatori != null && !allenatori.isEmpty()) {
             Allenatore allenatore = allenatori.get(0);
 
-            // 3. Sfruttiamo il tuo metodo dell'entità che gestisce già il legame bidirezionale
             boolean associato = allenatore.aggiungiAtleta(atleta);
 
             if (associato) {
-                // 4. Salviamo i cambiamenti nel Database
                 db.aggiorna(allenatore);
                 db.aggiorna(atleta);
             }
@@ -99,14 +90,13 @@ public class AppSport {
             return allenatore;
         }
 
-        return null; // Nessun allenatore trovato con questo codice
+        return null;
     }
     public boolean associazioneDiretta(Long idAllenatore, Long idAtleta) {
         if (idAllenatore == null || idAtleta == null) {
             return false;
         }
 
-        // 1. Recupero le due entità dal Database
         Allenatore allenatore = db.trovaPerId(Allenatore.class, idAllenatore);
         Atleta atleta = db.trovaPerId(Atleta.class, idAtleta);
 
@@ -117,17 +107,14 @@ public class AppSport {
             throw new IllegalArgumentException("Errore: Nessun atleta trovato con questo ID.");
         }
 
-        // 2. Sfruttiamo il metodo bidirezionale dell'entità Allenatore
         boolean associato = allenatore.aggiungiAtleta(atleta);
 
-        // 3. Se l'aggiunta ha successo (ovvero non erano già collegati) salviamo sul DB
         if (associato) {
             db.aggiorna(allenatore);
             db.aggiorna(atleta);
             return true;
         }
 
-        // Ritorna false se l'atleta era già presente nella lista dell'allenatore
         return false;
     }
 
@@ -150,12 +137,6 @@ public class AppSport {
     }
 
 
-    // METODI PER GESTORE SESSIONI
-
-    /**
-     * MODIFICATO: Garantisce che l'oggetto ritornato contenga l'ID generato automaticamente
-     * dal database, evitando il successivo errore 'id to load is required for loading'.
-     */
     public SessioneAllenamento creaNuovaSessione(Long idAllenatore, Long idAtleta, String titolo, String descrizione, int durataPrevista, Date dataSvolgimento) {
         Allenatore allenatore = db.trovaPerId(Allenatore.class, idAllenatore);
         Atleta atleta = db.trovaPerId(Atleta.class, idAtleta);
@@ -170,20 +151,13 @@ public class AppSport {
             nuovaSessione.setAtleta(atleta);
             atleta.aggiungiSessione(nuovaSessione);
 
-            // Per evitare che l'ID rimanga null nell'oggetto locale a causa del disallineamento della cache di sessione,
-            // salviamo l'atleta (che fa cascade sulla sessione) ed estraiamo l'istanza aggiornata dal database.
             db.aggiorna(atleta);
 
-            // TRUCCO DI SICUREZZA: Recuperiamo l'ultimo elemento della lista delle sessioni dell'atleta.
-            // Se Hibernate ha sincronizzato lo stato tramite il cascade, l'ultimo elemento
-            // della collezione conterrà l'ID autoincrementato aggiornato.
             List<SessioneAllenamento> sessioni = atleta.getSessioniAllenamento();
             if (sessioni != null && !sessioni.isEmpty()) {
                 SessioneAllenamento sessioneAggiornata = sessioni.get(sessioni.size() - 1);
 
-                // Se per qualche motivo l'ID è ancora null (es. a causa del pattern detached del GestorePersistenza),
-                // proviamo a forzare un salvataggio/aggiornamento diretto sulla sessione per blindare il risultato.
-                if (sessioneAggiornata.getIdSessione() == null) {
+               if (sessioneAggiornata.getIdSessione() == null) {
                     db.salva(nuovaSessione);
                     return nuovaSessione;
                 }
@@ -199,7 +173,7 @@ public class AppSport {
         if (idSessione == null) {
             return null;
         }
-        // Sostituisci 'db' con il nome della tua variabile interna al Facade per il GestorePersistenza/EntityManager
+
         return db.trovaPerId(SessioneAllenamento.class, idSessione);
     }
 
@@ -224,15 +198,12 @@ public class AppSport {
         }
     }
     public List<Esercizio> getEserciziSessione(Long idSessione) {
-        // 1. Recuperiamo la sessione dal database tramite il suo ID
         SessioneAllenamento sessione = db.trovaPerId(SessioneAllenamento.class, idSessione);
 
         if (sessione != null) {
-            // 2. Usiamo il getter che hai appena definito nell'entità Sessione
             return sessione.getEsercizi();
         }
 
-        // Se la sessione non esiste, ritorniamo una lista vuota per evitare NullPointerException
         return new ArrayList<>();
     }
 
@@ -252,7 +223,6 @@ public class AppSport {
         return new java.util.ArrayList<>();
     }
 
-    // METODI PER LA DASHBOARD
 
     public Map<String, Integer> getIndicatoriAggregati(Long idAllenatore) {
         Map<String, Integer> indicatori = new java.util.HashMap<>();
@@ -264,13 +234,12 @@ public class AppSport {
             int totaleAtleti = atleti.size();
             int sessioniTotaliAssegnate = 0;
             int sessioniCompletate = 0;
-            int sessioniInCorso = 0; // Nuovo contatore
+            int sessioniInCorso = 0;
 
             for (Atleta a : atleti) {
                 for (SessioneAllenamento s : a.getSessioniAllenamento()) {
                     sessioniTotaliAssegnate++;
 
-                    // Controllo basato sullo stato della sessione
                     if (s.getStato() == StatoSessione.COMPLETATA) {
                         sessioniCompletate++;
                     } else if (s.getStato() == StatoSessione.IN_CORSO) {
@@ -295,11 +264,9 @@ public class AppSport {
         Atleta atleta = db.trovaPerId(Atleta.class, idAtleta);
         Allenatore allenatore = db.trovaPerId(Allenatore.class, idAllenatore);
 
-        // Controllo di sicurezza: l'atleta deve esistere e deve essere associato a questo coach
         if (atleta != null && allenatore != null && allenatore.haAtletaAssociato(atleta)) {
 
             for (SessioneAllenamento s : atleta.getSessioniAllenamento()) {
-                // Calcoliamo l'evoluzione solo sulle sessioni effettivamente terminate
                 if (s.isCompletata() && s.getDataSvolgimento() != null) {
 
                     int volumeRipetizioniSessione = 0;
@@ -330,7 +297,6 @@ public class AppSport {
             int tempoPrevistoTotale = 0;
             int tempoEffettivoTotale = 0;
 
-            // Raccogliamo i dati di tutte le sessioni completate
             for (SessioneAllenamento s : atleta.getSessioniAllenamento()) {
                 if (s.isCompletata()) {
                     for (Esercizio e : s.getEsercizi()) {
@@ -342,7 +308,6 @@ public class AppSport {
                 }
             }
 
-            // Calcolo percentuali di completamento (evitando divisioni per zero)
             if (ripPrevisteTotali > 0) {
                 double percRipetizioni = ((double) ripEffettiveTotali / ripPrevisteTotali) * 100;
                 scostamenti.put("Tasso Completamento Ripetizioni (%)", percRipetizioni);
@@ -362,7 +327,6 @@ public class AppSport {
         Allenatore allenatore = db.trovaPerId(Allenatore.class, idAllenatore);
 
         if (allenatore != null) {
-            // Scorriamo tutti gli atleti e accumuliamo le loro sessioni in un'unica lista
             for (Atleta a : allenatore.getAtletiAssociati()) {
                 tutteLeSessioni.addAll(a.getSessioniAllenamento());
             }
@@ -370,13 +334,10 @@ public class AppSport {
         return tutteLeSessioni;
     }
 
-    // Recupera tutte le sessioni associate a un singolo atleta
     public List<SessioneAllenamento> getSessioniAtleta(Long idAtleta) {
         Atleta atleta = db.trovaPerId(Atleta.class, idAtleta);
 
         if (atleta != null) {
-            // Restituisce la lista completa delle sessioni dell'atleta.
-            // (Il filtro per stato verrà poi applicato dalla GUI o dal Controller)
             return atleta.getSessioniAllenamento();
         }
 
@@ -391,16 +352,16 @@ public class AppSport {
 
         List<SessioneAllenamento> tutteLeSessioni = atleta.getSessioniAllenamento();
 
-        // Usa gli Stream di Java per un filtraggio elegante e pulito
+        // Uso degli Stream di Java per un filtraggio ottimizzato
         return tutteLeSessioni.stream()
-                // Filtro 1: Stato (ignora se null o se vale "Tutte le sessioni")
+                // Filtro 1: Stato
                 .filter(s -> stato == null || stato.equals("Tutte le sessioni") || s.getStato().equalsIgnoreCase(stato))
 
-                // Filtro 2: Titolo (ignora se null o vuoto)
+                // Filtro 2: Titolo
                 .filter(s -> keywordTitolo == null || keywordTitolo.trim().isEmpty() ||
                         (s.getTitolo() != null && s.getTitolo().toLowerCase().contains(keywordTitolo.trim().toLowerCase())))
 
-                // Filtro 3: Data (ignora se null) - Attenzione: confronta usando metodi sicuri per le date
+                // Filtro 3: Data
                 .filter(s -> dataEsatta == null ||
                         (s.getDataSvolgimento() != null && isStessoGiorno(s.getDataSvolgimento(), dataEsatta)))
 
@@ -408,8 +369,6 @@ public class AppSport {
                 .collect(Collectors.toList());
     }
 
-    // Metodo di supporto (privato) per confrontare se due date sono lo stesso giorno
-    // ignorando ore/minuti/secondi
     private boolean isStessoGiorno(Date data1, Date data2) {
         java.util.Calendar cal1 = java.util.Calendar.getInstance();
         java.util.Calendar cal2 = java.util.Calendar.getInstance();

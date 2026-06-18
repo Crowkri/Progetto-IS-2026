@@ -16,7 +16,6 @@ public class GestoreSessioni {
     }
 
     public SessioneAllenamento creaNuovaSessione(Long idAllenatore, Long idAtleta, String titolo, String descrizione, int durataPrevista, Date dataSvolgimento) {
-        // Validazione formale dei dati inseriti dalla Boundary (GUI)
         if (titolo == null || titolo.isBlank() || durataPrevista <= 0 || dataSvolgimento == null) {
             throw new IllegalArgumentException("Dati sessione incompleti o non validi.");
         }
@@ -50,14 +49,12 @@ public class GestoreSessioni {
         if (idAtleta == null) {
             throw new IllegalArgumentException("ID Atleta non valido.");
         }
-        // Delega la chiamata al Facade
         return facade.getSessioniAtleta(idAtleta);
     }
     public List<SessioneAllenamento> getSessioniAtletaFiltrate(Long idAtleta, String stato, String titolo, Date data) {
         if (idAtleta == null) {
             throw new IllegalArgumentException("Errore: ID Atleta non fornito.");
         }
-        // Delega tutto al Facade!
         return facade.filtraSessioniAtleta(idAtleta, stato, titolo, data);
     }
     public List<Entity.Esercizio> getEserciziSessione(Long idSessione) {

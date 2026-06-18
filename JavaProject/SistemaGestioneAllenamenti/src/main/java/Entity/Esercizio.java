@@ -14,7 +14,7 @@ public class Esercizio {
     @Column(nullable = false)
     private String nome;
 
-    @Column(columnDefinition = "TEXT") // TEXT permette di inserire testi molto lunghi
+    @Column(columnDefinition = "TEXT")
     private String descrizione;
 
     @Column(name = "ripetizioni_previste")
@@ -23,7 +23,7 @@ public class Esercizio {
     @Column(name = "durata_prevista")
     private Integer durataPrevista; // in minuti
 
-    // Attributi delle SessioniAllenamento compilati dall'Atleta
+    // Attributi di SessioniAllenamento compilati dall'Atleta
 
     @Column(name = "ripetizioni_effettive")
     private Integer ripetizioniEffettive;
@@ -34,20 +34,15 @@ public class Esercizio {
     @Column(name = "nota_testuale", columnDefinition = "TEXT")
     private String notaTestuale;
 
-    // RELAZIONI
     // Relazione Molti a 1: Molti Esercizi appartengono a 1 Sessione
-
     @ManyToOne
     @JoinColumn(name = "id_sessione")
     private SessioneAllenamento sessione;
 
-    // COSTRUTTORI
 
-    // 1. Costruttore obbligatorio
     protected Esercizio() {
     }
 
-    // 2. Costruttore base per la creazione (senza ID e prestazioni)
     public Esercizio(String nome, String descrizione, int ripetizioniPreviste, int durataPrevista) {
         this.nome = nome;
         this.descrizione = descrizione;
@@ -55,7 +50,6 @@ public class Esercizio {
         this.durataPrevista = durataPrevista;
     }
 
-    // 3. Costruttore completo (con ID, per i test o ricaricamento)
     public Esercizio(Long idEsercizio, String nome, String descrizione, int ripetizioniPreviste, int durataPrevista) {
         this.idEsercizio = idEsercizio;
         this.nome = nome;
@@ -64,7 +58,6 @@ public class Esercizio {
         this.durataPrevista = durataPrevista;
     }
 
-    // METODI
 
     public void registraEsecuzione(int ripetizioniEffettive, int tempoImpiegato, String notaTestuale) {
         this.ripetizioniEffettive = ripetizioniEffettive;
@@ -72,7 +65,6 @@ public class Esercizio {
         this.notaTestuale = notaTestuale;
     }
 
-    // GETTER E SETTER
 
     public Long getIdEsercizio() { return idEsercizio; }
 
@@ -92,7 +84,7 @@ public class Esercizio {
     public int getTempoImpiegato() { return tempoImpiegato; }
     public String getNotaTestuale() { return notaTestuale; }
 
-    // Getter e Setter per la relazione con la sessione
+
     public SessioneAllenamento getSessione() { return sessione; }
     public void setSessione(SessioneAllenamento sessione) { this.sessione = sessione; }
 }

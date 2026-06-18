@@ -32,7 +32,6 @@ public class GuiDettaglioSessione extends JFrame {
         this.atletaLoggato = atleta;
         this.sessioneCorrente = sessione;
 
-        // Inizializziamo i controllori
         this.gestoreSessioni = new GestoreSessioni(new AppSport());
         this.gestoreUtenti = new GestoreUtenti(new AppSport());
 
@@ -41,16 +40,16 @@ public class GuiDettaglioSessione extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Chiude solo questa finestra
         setLocationRelativeTo(null);
 
-        // 1. Costruzione manuale della GUI per assicurarci che i nomi siano quelli giusti
+        // Costruzione manuale; della GUI per assicurarci che i nomi siano quelli giusti
         inizializzaInterfaccia();
 
-        // 2. Popolamento tabella esercizi
+        // Popolamento tabella esercizi
         aggiornaTabellaEsercizi();
 
-        // 3. Logica di sblocco e registrazione
+        // Logica di sblocco e registrazione
         configuraEventi();
 
-        // 4. Stato iniziale: Campi bloccati
+        // Stato iniziale: Campi bloccati
         setCampiEditable(false);
     }
 
@@ -58,17 +57,14 @@ public class GuiDettaglioSessione extends JFrame {
         mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        // Intestazione
         lblInfoSessione = new JLabel("Sessione: " + sessioneCorrente.getTitolo());
         lblInfoSessione.setFont(new Font("Arial", Font.BOLD, 16));
         mainPanel.add(lblInfoSessione, BorderLayout.NORTH);
 
-        // Tabella Esercizi (Centro)
         tblEsercizi = new JTable();
         JScrollPane scrollPane = new JScrollPane(tblEsercizi);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Pannello Input (Sud)
         JPanel pnlSud = new JPanel(new GridLayout(0, 1, 5, 5));
 
         txtRipetizioniEffettive = new JTextField();
@@ -97,7 +93,7 @@ public class GuiDettaglioSessione extends JFrame {
             public boolean isCellEditable(int row, int column) { return false; }
         };
 
-        // Recuperiamo gli esercizi della sessione passata
+        // Esericizi dalla scorsa sessione
         List<Esercizio> lista = gestoreSessioni.getEserciziSessione(sessioneCorrente.getIdSessione());
         for (Esercizio e : lista) {
             model.addRow(new Object[]{
@@ -109,7 +105,7 @@ public class GuiDettaglioSessione extends JFrame {
         }
         tblEsercizi.setModel(model);
 
-        // Nascondi colonna ID
+        // Per nascondere colonna ID
         tblEsercizi.getColumnModel().getColumn(0).setMinWidth(0);
         tblEsercizi.getColumnModel().getColumn(0).setMaxWidth(0);
     }
@@ -120,7 +116,6 @@ public class GuiDettaglioSessione extends JFrame {
         areaNota.setEditable(editable);
         btnRegistra.setEnabled(editable);
 
-        // Effetto visivo per capire che è bloccato
         Color sfondo = editable ? Color.WHITE : new Color(230, 230, 230);
         txtRipetizioniEffettive.setBackground(sfondo);
         txtTempoImpiegato.setBackground(sfondo);
@@ -128,7 +123,7 @@ public class GuiDettaglioSessione extends JFrame {
     }
 
     private void configuraEventi() {
-        // SBLOCCO DINAMICO: I campi si sbloccano SOLO quando l'atleta seleziona un esercizio dalla tabella
+        // I campi si sbloccano SOLO quando l'atleta seleziona un esercizio dalla tabella
         tblEsercizi.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 boolean rigaSelezionata = tblEsercizi.getSelectedRow() != -1;
@@ -136,27 +131,23 @@ public class GuiDettaglioSessione extends JFrame {
             }
         });
 
-        // REGISTRAZIONE PERFORMANCE ATLETA
+        // Registrazione Risultati
         btnRegistra.addActionListener(e -> {
             int riga = tblEsercizi.getSelectedRow();
             if (riga == -1) return; // Sicurezza se non c'è selezione
 
-            // Validazione: Controlla che i campi obbligatori non siano vuoti
             if (txtRipetizioniEffettive.getText().trim().isEmpty() || txtTempoImpiegato.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Compila i campi Ripetizioni e Tempo prima di registrare!", "Dati Mancanti", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             try {
-                // 1. Recuperiamo l'ID dell'esercizio selezionato dalla colonna 0 (nascosta)
                 Long idEsercizio = (Long) tblEsercizi.getModel().getValueAt(riga, 0);
 
-                // 2. Estraiamo i dati effettivi inseriti dall'atleta nei campi
                 int ripEffettive = Integer.parseInt(txtRipetizioniEffettive.getText().trim());
                 int tempoImpiegato = Integer.parseInt(txtTempoImpiegato.getText().trim());
                 String notaAtleta = areaNota.getText().trim();
 
-                // 3. CHIAMATA AL CONTROLLER: Usiamo il tuo gestoreSessioni con la firma esatta
                 gestoreSessioni.registraEsecuzioneEsercizio(
                         atletaLoggato.getIdAtleta(),
                         idEsercizio,
@@ -167,7 +158,6 @@ public class GuiDettaglioSessione extends JFrame {
 
                 JOptionPane.showMessageDialog(this, "Esecuzione registrata con successo!");
 
-                // 4. Pulizia campi e reset selezione (questo ribloccherà i campi in automatico)
                 txtRipetizioniEffettive.setText("");
                 txtTempoImpiegato.setText("");
                 areaNota.setText("");

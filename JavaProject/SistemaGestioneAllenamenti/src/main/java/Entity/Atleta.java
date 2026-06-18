@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "atleti") // Nome della tabella nel database
+@Table(name = "atleti")
 public class Atleta extends Utente {
 
     @Id
@@ -20,7 +20,6 @@ public class Atleta extends Utente {
     private Allenatore allenatoreAssociato;
 
     // @Embedded "fonde" i campi di ProfiloAtleta direttamente in questa tabella
-    // (nota: la classe ProfiloAtleta dovrà avere l'annotazione @Embeddable)
     @Embedded
     private ProfiloAtleta profilo;
 
@@ -29,28 +28,24 @@ public class Atleta extends Utente {
     @OneToMany(mappedBy = "atleta", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<SessioneAllenamento> sessioniAllenamento;
 
-    // COSTRUTTORI
 
-    // 1. Costruttore vuoto
     protected Atleta() {
         super();
         this.sessioniAllenamento = new ArrayList<>();
     }
 
-    // 2. Costruttore per NUOVE registrazioni (SENZA ID)
     public Atleta(String nome, String cognome, String email, String password, String disciplinaPrevalente) {
         super(nome, cognome, email, password, disciplinaPrevalente);
         this.sessioniAllenamento = new ArrayList<>();
     }
 
-    // 3. Costruttore completo (CON ID)
     public Atleta(Long idAtleta, String nome, String cognome, String email, String password, String disciplinaPrevalente) {
         super(nome, cognome, email, password, disciplinaPrevalente);
         this.idAtleta = idAtleta;
         this.sessioniAllenamento = new ArrayList<>();
     }
 
-    // METODI
+
     public void impostaProfilo(ProfiloAtleta profilo) {
         this.profilo = profilo;
     }
@@ -75,19 +70,16 @@ public class Atleta extends Utente {
         return this.allenatoreAssociato != null && this.allenatoreAssociato.equals(allenatore);
     }
 
-    // EQUALS
+
     @Override
     public boolean equals(Object o) {
-        // 1. Se sono lo stesso identico oggetto in memoria, sono uguali
+
         if (this == o) return true;
 
-        // 2. Se l'oggetto passato è null o non è un Atleta, non sono uguali
         if (!(o instanceof Atleta)) return false;
 
-        // 3. Cast all'oggetto Atleta
         Atleta atleta = (Atleta) o;
 
-        // 4. Sono uguali SOLO se l'ID non è nullo e gli ID corrispondono
         return idAtleta != null && idAtleta.equals(atleta.getIdAtleta());
     }
 
@@ -97,7 +89,6 @@ public class Atleta extends Utente {
     }
 
 
-    // GETTER E SETTER
     public Long getIdAtleta() { return idAtleta; }
     public Allenatore getAllenatoreAssociato() { return allenatoreAssociato; }
     public ProfiloAtleta getProfilo() { return profilo; }

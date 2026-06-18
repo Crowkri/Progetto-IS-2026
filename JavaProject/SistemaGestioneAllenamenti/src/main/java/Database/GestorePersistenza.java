@@ -53,7 +53,7 @@ public class GestorePersistenza {
     public <T> List<T> cercaPerCampo(Class<T> classe, String nomeCampo, Object valore) {
         EntityManager em = JpaUtil.getInstance().getEntityManager();
         try {
-            // Utilizzo JPQL per creare una query dinamica
+            // Utilizzo di JPQL
             String jpql = "SELECT e FROM " + classe.getSimpleName() + " e WHERE e." + nomeCampo + " = :valore";
             TypedQuery<T> query = em.createQuery(jpql, classe);
             query.setParameter("valore", valore);

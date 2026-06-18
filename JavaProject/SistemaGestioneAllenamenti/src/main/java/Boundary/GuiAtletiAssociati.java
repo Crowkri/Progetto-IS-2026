@@ -15,10 +15,9 @@ import java.util.List;
 
 public class GuiAtletiAssociati extends JFrame {
 
-    // Questi componenti sono mappati direttamente dal tuo file .form
     private JPanel mainPanel;
     private JTable tblAtleti;
-    private JScrollPane scrollPaneAtleti; // Il tuo scrollPane del designer
+    private JScrollPane scrollPaneAtleti;
     private JButton btnAggiungiAtleta;
     private JButton btnDissociaAtleta;
     private JLabel lblInfoCoach;
@@ -30,14 +29,11 @@ public class GuiAtletiAssociati extends JFrame {
         this.allenatoreLoggato = allenatore;
         this.gestoreUtenti = new GestoreUtenti(new AppSport());
 
-        // SPOSTATO DA QUI...
-
         setTitle("Gestione Scuderia Atleti - Coach " + allenatoreLoggato.getNome());
         setSize(650, 500);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // ...A QUI! Mettilo dopo che IntelliJ ha avuto il tempo di agganciare i componenti
         if (mainPanel == null) {
             throw new IllegalStateException("mainPanel non è associato correttamente nel file .form. Controlla il field name nel Designer!");
         }
@@ -81,7 +77,7 @@ public class GuiAtletiAssociati extends JFrame {
             }
         });
 
-        // 1. TASTO AGGIUNGI (Pop-up di inserimento)
+        // TASTO AGGIUNGI (Pop-up di inserimento)
         btnAggiungiAtleta.addActionListener(e -> {
             String inputId = JOptionPane.showInputDialog(this,
                     "Inserisci l'ID dell'atleta da associare direttamente:",
@@ -109,7 +105,7 @@ public class GuiAtletiAssociati extends JFrame {
             }
         });
 
-        // 2. TASTO DISSOCIA
+        // TASTO DISSOCIA
         btnDissociaAtleta.addActionListener(e -> {
             int riga = tblAtleti.getSelectedRow();
             if (riga == -1) return;

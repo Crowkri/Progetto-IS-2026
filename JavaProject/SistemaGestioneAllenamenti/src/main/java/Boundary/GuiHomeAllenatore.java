@@ -12,7 +12,6 @@ import java.awt.event.ActionListener;
 
 public class GuiHomeAllenatore extends JFrame {
 
-    // --- FIELD NAMES (Mappati col GUI Designer) ---
     private JPanel mainPanel;
     private JLabel lblBenvenuto;
     private JButton btnGestioneSessioni;
@@ -24,26 +23,23 @@ public class GuiHomeAllenatore extends JFrame {
     public GuiHomeAllenatore(Allenatore allenatore) {
         this.allenatoreLoggato = allenatore;
 
-        // 1. Configurazione base della Finestra
+        //Configurazione iniziale Finestra
         setTitle("Area Personale Coach - " + allenatoreLoggato.getNome() + " " + allenatoreLoggato.getCognome());
         setContentPane(mainPanel);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(450, 350); // Finestra più compatta rispetto a quella dell'atleta
-        setLocationRelativeTo(null); // Centra sullo schermo
+        setSize(450, 350);
+        setLocationRelativeTo(null);
 
-        // 2. Inizializzazione dati
         inizializzaDatiDellaHome();
 
-        // 3. Gestione dei click
         gestisciEventiBottoni();
     }
 
     private void inizializzaDatiDellaHome() {
-        // Formatta il messaggio di benvenuto e il codice associazione
+        // Messaggio benvenuto
         lblBenvenuto.setText("Benvenuto Coach " + allenatoreLoggato.getNome() + "!");
         lblBenvenuto.setFont(new Font(lblBenvenuto.getFont().getName(), Font.BOLD, 18));
 
-        // Imposta i testi dei bottoni
         btnGestioneSessioni.setText("Crea / Gestisci Sessioni");
         btnDashboard.setText("Dashboard");
         btnAtletiAssociati.setText("I Miei Atleti Associati");
@@ -54,10 +50,8 @@ public class GuiHomeAllenatore extends JFrame {
         btnGestioneSessioni.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Crea l'istanza della finestra passando l'allenatore attualmente loggato
                 GuiGestioneSessioni guiSessioni = new GuiGestioneSessioni(allenatoreLoggato);
 
-                // Rende visibile la nuova interfaccia
                 guiSessioni.setVisible(true);
             }
         });
@@ -76,7 +70,6 @@ public class GuiHomeAllenatore extends JFrame {
             public void actionPerformed(ActionEvent e) {
 
                 try {
-                    // 2. Istanziamo la nuova interfaccia passando l'oggetto allenatore attualmente loggato
                     GuiAtletiAssociati guiAtleti = new GuiAtletiAssociati(allenatoreLoggato);
 
                     guiAtleti.setVisible(true);

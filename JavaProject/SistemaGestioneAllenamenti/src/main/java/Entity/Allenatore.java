@@ -5,40 +5,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "allenatori") // Diciamo al DB come si chiamerà la tabella
+@Table(name = "allenatori")
 public class Allenatore extends Utente {
 
-    @Id // È la chiave primaria
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Il DB la incrementa in automatico
+    @Id //Chiave primaria
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_allenatore")
     private Long idAllenatore;
 
-    @Column(name = "codice_associazione", unique = true) // Aggiungiamo 'unique' per evitare codici doppi nel DB!
+    @Column(name = "codice_associazione", unique = true)
     private String codicePerAssociare;
 
-    // Relazione 1 a Molti: 1 Allenatore ha N Atleti.
     // 'mappedBy' significa che la chiave esterna sta nell'Atleta (nella variabile chiamata "allenatoreAssociato")
     @OneToMany(mappedBy = "allenatoreAssociato",fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Atleta> atletiAssociati;
 
 
-    // COSTRUTTORI
-
-
-    // 1. Costruttore vuoto
     protected Allenatore() {
         super();
         this.atletiAssociati = new ArrayList<>();
     }
 
-    // 2. Costruttore per la Registrazione (SENZA ID)
     public Allenatore(String codicePerAssociare, String nome, String cognome, String email, String password, String disciplinaPrevalente) {
         super(nome, cognome, email, password, disciplinaPrevalente);
         this.codicePerAssociare = codicePerAssociare;
         this.atletiAssociati = new ArrayList<>();
     }
 
-    // 3. Costruttore completo (CON ID, per quando ricarichi i dati)
     public Allenatore(Long idAllenatore, String codicePerAssociare, String nome, String cognome, String email, String password, String disciplinaPrevalente) {
         super(nome, cognome, email, password, disciplinaPrevalente);
         this.idAllenatore = idAllenatore;
@@ -46,7 +39,6 @@ public class Allenatore extends Utente {
         this.atletiAssociati = new ArrayList<>();
     }
 
-    // METODI
 
     public boolean aggiungiAtleta(Atleta atleta) {
         if (!atletiAssociati.contains(atleta)) {

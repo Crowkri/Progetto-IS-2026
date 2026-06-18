@@ -23,12 +23,11 @@ import java.util.List;
 
 public class GuiHomeAtleta extends JFrame {
 
-    // --- FIELD NAMES ---
     private JPanel mainPanel;
     private JLabel lblBenvenuto;
     private JComboBox<String> cmbFiltroStato;
-    private JTextField txtRicercaTitolo; // Nuovo campo di ricerca
-    private JTextField txtFiltroData;    // Nuovo campo data
+    private JTextField txtRicercaTitolo;
+    private JTextField txtFiltroData;
     private JScrollPane tbscorrere;
     private JTable tblSessioni;
     private JButton btnVisualizzaDettagli;
@@ -41,7 +40,6 @@ public class GuiHomeAtleta extends JFrame {
     private GestoreUtenti gestoreUtenti;
 
     public GuiHomeAtleta(Atleta atleta) {
-        // 1. Inizializzazione IDE e Scudo Protettivo
         $$$setupUI$$$();
         if (mainPanel == null) {
             mainPanel = new JPanel(new BorderLayout());
@@ -58,7 +56,6 @@ public class GuiHomeAtleta extends JFrame {
         setSize(850, 550);
         setLocationRelativeTo(null);
 
-        // Previene NullPointerException se la grafica non è pronta
         if (lblBenvenuto != null) {
             inizializzaDatiDellaHome();
             gestisciEventiBottoni();
@@ -69,7 +66,7 @@ public class GuiHomeAtleta extends JFrame {
         lblBenvenuto.setText("Bentornato, " + atletaLoggato.getNome() + "!");
         lblBenvenuto.setFont(new Font(lblBenvenuto.getFont().getName(), Font.BOLD, 18));
 
-        // Inizializza filtri
+        // Filtri
         cmbFiltroStato.addItem("Tutte le sessioni");
         cmbFiltroStato.addItem("ASSEGNATA");
         cmbFiltroStato.addItem("IN_CORSO");
@@ -80,16 +77,13 @@ public class GuiHomeAtleta extends JFrame {
     }
 
     private void applicaFiltri() {
-        // 1. Estrapola lo Stato
         String stato = (String) cmbFiltroStato.getSelectedItem();
         if ("Tutte le sessioni".equals(stato)) {
-            stato = null; // Il Facade interpreterà null come "ignora filtro"
+            stato = null; // Facade: null = ignora filtro
         }
 
-        // 2. Estrapola il Titolo
         String titolo = txtRicercaTitolo.getText().trim();
 
-        // 3. Estrapola la Data (con conversione sicura)
         Date dataFiltro = null;
         String dataStr = txtFiltroData.getText().trim();
         if (!dataStr.isEmpty() && !dataStr.equals("gg/mm/aaaa")) {
@@ -98,15 +92,12 @@ public class GuiHomeAtleta extends JFrame {
                 sdfParse.setLenient(false); // Evita date impossibili (es. 32/13/2026)
                 dataFiltro = sdfParse.parse(dataStr);
             } catch (Exception e) {
-                // Se la data è parziale o mal formattata, ignoriamo il filtro senza bloccare l'app
                 dataFiltro = null;
             }
         }
 
-        // 4. Delega il recupero delle sessioni filtrate al Controller
         List<SessioneAllenamento> sessioniFiltrate = gestoreSessioni.getSessioniAtletaFiltrate(atletaLoggato.getIdAtleta(), stato, titolo, dataFiltro);
 
-        // 5. Aggiorna la grafica
         popolaTabella(sessioniFiltrate);
     }
 
@@ -143,10 +134,8 @@ public class GuiHomeAtleta extends JFrame {
 
     private void gestisciEventiBottoni() {
 
-        // Listener 1: Cambio stato nella tendina
         cmbFiltroStato.addActionListener(e -> applicaFiltri());
 
-        // DocumentListener per aggiornare la tabella ad ogni lettera digitata nel Titolo
         txtRicercaTitolo.getDocument().addDocumentListener(new DocumentListener() {
             public void insertUpdate(DocumentEvent e) {
                 applicaFiltri();
@@ -161,7 +150,6 @@ public class GuiHomeAtleta extends JFrame {
             }
         });
 
-        // DocumentListener per aggiornare la tabella ad ogni numero digitato nella Data
         txtFiltroData.getDocument().addDocumentListener(new DocumentListener() {
             public void insertUpdate(DocumentEvent e) {
                 applicaFiltri();
@@ -176,7 +164,6 @@ public class GuiHomeAtleta extends JFrame {
             }
         });
 
-        // FocusListener per ripulire il campo data (se c'è scritto gg/mm/aaaa)
         txtFiltroData.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent evt) {
                 if (txtFiltroData.getText().equals("gg/mm/aaaa")) {
@@ -185,27 +172,20 @@ public class GuiHomeAtleta extends JFrame {
             }
         });
 
-        // Bottoni Standard
         btnVisualizzaDettagli.addActionListener(e -> {
-            // 1. Recuperiamo la riga selezionata dall'atleta nella JTable
             int riga = tblSessioni.getSelectedRow();
 
-            // 2. Controllo di sicurezza: se l'utente non ha selezionato nessuna riga
             if (riga == -1) {
                 JOptionPane.showMessageDialog(mainPanel, "Seleziona prima una sessione dalla tabella!", "Attenzione", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             try {
-                // 3. Estraiamo l'ID della sessione dalla colonna 0 (quella che abbiamo nascosto)
                 Long idSessione = (Long) tblSessioni.getModel().getValueAt(riga, 0);
 
-                // 4. Chiediamo al controller l'istanza dell'Entity completa
-                // Assicurati che nel tuo GestoreSessioni ci sia il metodo getSessioneById(id) che delega al Facade
                 SessioneAllenamento sessioneSelezionata = gestoreSessioni.getSessioneById(idSessione);
 
                 if (sessioneSelezionata != null) {
-                    // 5. Apriamo la nuova GUI passando l'atleta loggato e l'oggetto sessione appena recuperato
                     new GuiDettaglioSessione(atletaLoggato, sessioneSelezionata).setVisible(true);
                 } else {
                     JOptionPane.showMessageDialog(mainPanel, "Errore: Impossibile recuperare i dati della sessione.", "Errore", JOptionPane.ERROR_MESSAGE);
@@ -217,19 +197,14 @@ public class GuiHomeAtleta extends JFrame {
         });
 
         btnProfilo.addActionListener(e -> {
-            // Apriamo la GuiProfiloAtleta passando l'atletaLoggato sia come soggetto che come visualizzatore
             new GuiProfiloAtleta(atletaLoggato, atletaLoggato).setVisible(true);
         });
         allenatorbtneAssociatoButton.addActionListener(e -> {
-            // 1. Istanziamo il controller corretto
             GestoreUtenti gestoreUtenti = new GestoreUtenti(new AppSport());
 
-            // 2. Recuperiamo l'allenatore attuale
-            // Assicurati che l'entità Atleta abbia il metodo getAllenatoreAssociato()
             Allenatore allenatoreAttuale = atletaLoggato.getAllenatoreAssociato();
 
             if (allenatoreAttuale != null) {
-                // --- SCENARIO A: GIÀ ASSOCIATO (Dissociazione) ---
                 int scelta = JOptionPane.showConfirmDialog(mainPanel,
                         "Revocare associazione con " + allenatoreAttuale.getNome() + "?",
                         "Gestione Allenatore",
@@ -237,10 +212,8 @@ public class GuiHomeAtleta extends JFrame {
 
                 if (scelta == JOptionPane.YES_OPTION) {
                     try {
-                        // Chiamata al metodo corretto del GestoreUtenti
                         gestoreUtenti.dissociaAllenatore(atletaLoggato.getIdAtleta());
 
-                        // Aggiornamento entità locale (passiamo null per rimuovere il legame)
                         atletaLoggato.associaAllenatore(null);
 
                         JOptionPane.showMessageDialog(mainPanel, "Dissociazione avvenuta.");
@@ -249,7 +222,6 @@ public class GuiHomeAtleta extends JFrame {
                     }
                 }
             } else {
-                // --- SCENARIO B: NON ASSOCIATO (Associazione tramite codice) ---
                 String codice = JOptionPane.showInputDialog(mainPanel, "Inserisci il codice del tuo allenatore:");
 
                 if (codice != null && !codice.trim().isEmpty()) {

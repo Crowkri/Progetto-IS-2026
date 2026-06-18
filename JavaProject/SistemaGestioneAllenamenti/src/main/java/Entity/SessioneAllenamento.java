@@ -23,7 +23,7 @@ public class SessioneAllenamento {
     @Column(name = "durata_prevista")
     private int durataPrevista; // in minuti
 
-    @Temporal(TemporalType.DATE) // Specifica che nel DB salveremo solo la data (senza l'ora)
+    @Temporal(TemporalType.DATE)
     @Column(name = "data_svolgimento")
     private Date dataSvolgimento;
 
@@ -31,7 +31,6 @@ public class SessioneAllenamento {
     @Column(name = "stato")
     private StatoSessione stato;
 
-    // RELAZIONi
 
     // Relazione Molti a 1: Molte Sessioni appartengono a 1 Atleta
     @ManyToOne
@@ -42,14 +41,11 @@ public class SessioneAllenamento {
     @OneToMany(mappedBy = "sessione", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
     private List<Esercizio> esercizi;
 
-    // COSTRUTTORI
 
-    // 1. Costruttore vuoto obbligatorio
     protected SessioneAllenamento() {
         this.esercizi = new ArrayList<>();
     }
 
-    // 2. Costruttore per la creazione (SENZA ID)
     public SessioneAllenamento(String titolo, String descrizione, int durataPrevista, Date dataSvolgimento) {
         this.titolo = titolo;
         this.descrizione = descrizione;
@@ -59,7 +55,6 @@ public class SessioneAllenamento {
         this.esercizi = new ArrayList<>();
     }
 
-    // 3. Costruttore completo (CON ID, ricaricare i dati o i test)
     public SessioneAllenamento(Long idSessione, String titolo, String descrizione, int durataPrevista, Date dataSvolgimento) {
         this.idSessione = idSessione;
         this.titolo = titolo;
@@ -70,7 +65,6 @@ public class SessioneAllenamento {
         this.esercizi = new ArrayList<>();
     }
 
-    // METODI DI LOGICA E BUSINESS
 
     public void aggiungiEsercizio(Esercizio esercizio) {
         this.esercizi.add(esercizio);
@@ -101,7 +95,6 @@ public class SessioneAllenamento {
         return totale;
     }
 
-    // GETTER E SETTER
 
     public Long getIdSessione() { return idSessione; }
 

@@ -11,7 +11,6 @@ import java.util.Map;
 
 public class GuiConfronto extends JFrame {
 
-    // --- FIELD NAMES ---
     private JPanel mainPanel;
     private JLabel lblTitolo;
     private JScrollPane scrollTabella;
@@ -49,7 +48,6 @@ public class GuiConfronto extends JFrame {
         // Popola la tabella ciclando dinamicamente la Mappa
         if (datiConfronto != null && !datiConfronto.isEmpty()) {
             for (Map.Entry<String, Double> entry : datiConfronto.entrySet()) {
-                // Formatta il double per mostrare massimo 2 cifre decimali e il simbolo %
                 String valoreFormattato = String.format("%.2f %%", entry.getValue());
                 tableModel.addRow(new Object[]{entry.getKey(), valoreFormattato});
             }
@@ -58,7 +56,7 @@ public class GuiConfronto extends JFrame {
         }
 
         tblConfronto.setModel(tableModel);
-        tblConfronto.setRowHeight(30); // Righe un po' più alte per leggibilità
+        tblConfronto.setRowHeight(30);
     }
 
     {

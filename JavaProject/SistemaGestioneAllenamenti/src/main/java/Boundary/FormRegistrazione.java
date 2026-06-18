@@ -27,7 +27,6 @@ public class FormRegistrazione {
     public FormRegistrazione(GestoreUtenti gestoreUtenti) {
         this.gestoreUtenti = gestoreUtenti;
 
-        // --- NUOVO LISTENER PER UX DINAMICA ---
         cmbRuolo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -62,7 +61,6 @@ public class FormRegistrazione {
         String disciplina = txtDisciplina.getText();
         String codice = txtCodiceAssociazione.getText();
 
-        // FIX UX: Pulisce il testo se l'utente non ha inserito nulla e c'è ancora il suggerimento
         if (codice.equals("Opzionale: Codice Allenatore") || codice.equals("Obbligatorio: Crea il tuo Codice")) {
             codice = "";
         }
@@ -81,7 +79,7 @@ public class FormRegistrazione {
 
         try {
             if (ruolo.equals("Atleta")) {
-                // CONTROLLO ATLETA: Se inserisce un codice, deve esistere!
+                // Controllo esistenza codice Allenatore
                 if (!codice.isEmpty()) {
                     if (!gestoreUtenti.esisteCodiceAllenatore(codice)) {
                         lblEsito.setText("Errore: Il codice allenatore inserito non esiste.");
@@ -102,7 +100,7 @@ public class FormRegistrazione {
                     return;
                 }
 
-                // CONTROLLO ALLENATORE: Il codice NON deve esistere già!
+                // Controllo inesistenza codice Allenatore
                 if (gestoreUtenti.esisteCodiceAllenatore(codice)) {
                     lblEsito.setText("Errore: Questo codice è già in uso da un altro allenatore.");
                     lblEsito.setForeground(Color.RED);
@@ -135,11 +133,9 @@ public class FormRegistrazione {
     public static void main(String[] args) {
         JFrame frame = new JFrame("Registrazione Sistema Allenamenti");
 
-        // --- FIX DEL MAIN PER TESTARE LA SCHERMATA DA SOLA ---
         AppSport facade = new AppSport();
         GestoreUtenti controller = new GestoreUtenti(facade);
 
-        // Ora passi il controller istanziato, non 'null', così non va in NullPointerException
         frame.setContentPane(new FormRegistrazione(controller).contentPane);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

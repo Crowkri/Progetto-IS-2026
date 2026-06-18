@@ -21,10 +21,9 @@ import java.util.List;
 
 public class GuiGestioneSessioni extends JFrame {
 
-    // --- FIELD NAMES (Mappati col GUI Designer) ---
     private JPanel mainPanel;
 
-    // Campi Sessione
+    // Sessione
     private JComboBox<String> cmbAtleti;
     private JTextField txtTitolo;
     private JTextField txtDescrizioneSessione;
@@ -32,7 +31,7 @@ public class GuiGestioneSessioni extends JFrame {
     private JTextField txtDurataPrevista;
     private JButton btnCreaSessione;
 
-    // Campi Esercizio
+    // Esercizio
     private JScrollPane scrollEsercizi;
     private JTable tblEsercizi;
     private JTextField txtNomeEsercizio;
@@ -45,19 +44,17 @@ public class GuiGestioneSessioni extends JFrame {
     private SessioneAllenamento sessioneAppenaCreata;
     private DefaultTableModel tableModel;
 
-    // Istanze dei Controller
+    // Controller
     private GestoreUtenti gestoreUtenti;
     private GestoreSessioni gestoreSessioni;
 
     public GuiGestioneSessioni(Allenatore allenatore) {
         this.allenatoreLoggato = allenatore;
 
-        // Inizializza l'architettura: un solo Facade passato ai vari Controller
         AppSport facade = new AppSport();
         this.gestoreUtenti = new GestoreUtenti(facade);
         this.gestoreSessioni = new GestoreSessioni(facade);
 
-        // Configurazione Finestra
         setTitle("Creazione Nuova Sessione");
         setContentPane(mainPanel);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -71,7 +68,6 @@ public class GuiGestioneSessioni extends JFrame {
     private void inizializzaInterfaccia() {
         setStatoAreaEsercizi(false);
 
-        // Setup della tabella degli esercizi
         String[] colonne = {"Nome Esercizio", "Descrizione", "Ripetizioni", "Durata (min)"};
         tableModel = new DefaultTableModel(colonne, 0) {
             @Override
@@ -81,12 +77,10 @@ public class GuiGestioneSessioni extends JFrame {
         };
         tblEsercizi.setModel(tableModel);
 
-        // Popolamento tendina tramite il GestoreUtenti
         cmbAtleti.removeAllItems();
         cmbAtleti.addItem("Seleziona Atleta...");
 
         try {
-            // Delega al GestoreUtenti (ricordati di creare questo metodo nel controller se manca!)
             List<Atleta> mieiAtleti = gestoreUtenti.getAtletiAssociati(allenatoreLoggato.getIdAllenatore());
 
             if (mieiAtleti != null && !mieiAtleti.isEmpty()) {
@@ -108,7 +102,6 @@ public class GuiGestioneSessioni extends JFrame {
 
     private void gestisciEventiBottoni() {
 
-        // --- CREAZIONE SESSIONE ---
         btnCreaSessione.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -117,7 +110,6 @@ public class GuiGestioneSessioni extends JFrame {
                 String dataString = txtData.getText().trim();
                 String durataString = txtDurataPrevista.getText().trim();
 
-                // Controlli visivi Boundary
                 if (cmbAtleti.getSelectedIndex() <= 0) {
                     JOptionPane.showMessageDialog(mainPanel, "Seleziona un atleta valido.", "Errore", JOptionPane.ERROR_MESSAGE);
                     return;
@@ -129,7 +121,6 @@ public class GuiGestioneSessioni extends JFrame {
                 }
 
                 try {
-                    // Preparazione dati
                     SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
                     format.setLenient(false);
                     Date dataSvolgimento = format.parse(dataString);
@@ -138,7 +129,6 @@ public class GuiGestioneSessioni extends JFrame {
                     String idString = atletaSelezionato.split(" - ")[0];
                     Long idAtleta = Long.parseLong(idString);
 
-                    // CHIAMATA AL CONTROLLER: GestoreSessioni
                     sessioneAppenaCreata = gestoreSessioni.creaNuovaSessione(
                             allenatoreLoggato.getIdAllenatore(),
                             idAtleta,
@@ -151,7 +141,6 @@ public class GuiGestioneSessioni extends JFrame {
                     if (sessioneAppenaCreata != null) {
                         JOptionPane.showMessageDialog(mainPanel, "Sessione Creata con successo! Ora puoi aggiungere gli esercizi.");
 
-                        // Aggiornamento interfaccia
                         btnCreaSessione.setEnabled(false);
                         cmbAtleti.setEnabled(false);
                         txtTitolo.setEnabled(false);
@@ -166,7 +155,6 @@ public class GuiGestioneSessioni extends JFrame {
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(mainPanel, "La durata deve essere un numero valido.", "Errore", JOptionPane.ERROR_MESSAGE);
                 } catch (IllegalArgumentException ex) {
-                    // Cattura le eccezioni di validazione lanciate dal Controller
                     JOptionPane.showMessageDialog(mainPanel, ex.getMessage(), "Errore Compilazione", JOptionPane.WARNING_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(mainPanel, "Errore di sistema: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
@@ -174,7 +162,6 @@ public class GuiGestioneSessioni extends JFrame {
             }
         });
 
-        // --- AGGIUNTA ESERCIZIO ---
         btnAggiungiEsercizio.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -187,7 +174,6 @@ public class GuiGestioneSessioni extends JFrame {
                     int ripetizioni = Integer.parseInt(repString);
                     int durata = Integer.parseInt(durataString);
 
-                    // CHIAMATA AL CONTROLLER: GestoreSessioni
                     gestoreSessioni.aggiungiEsercizioASessione(
                             allenatoreLoggato.getIdAllenatore(),
                             sessioneAppenaCreata.getIdSessione(),
@@ -207,7 +193,6 @@ public class GuiGestioneSessioni extends JFrame {
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(mainPanel, "Ripetizioni e Durata devono essere numeri validi.", "Errore", JOptionPane.ERROR_MESSAGE);
                 } catch (IllegalArgumentException ex) {
-                    // Cattura le eccezioni di validazione lanciate dal Controller
                     JOptionPane.showMessageDialog(mainPanel, ex.getMessage(), "Dati Non Validi", JOptionPane.WARNING_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(mainPanel, "Errore nel salvataggio dell'esercizio: " + ex.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);

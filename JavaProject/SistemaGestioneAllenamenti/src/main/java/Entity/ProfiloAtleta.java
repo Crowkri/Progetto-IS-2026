@@ -15,20 +15,16 @@ public class ProfiloAtleta {
     @Column(name = "obiettivi_sportivi", columnDefinition = "TEXT")
     private String obiettiviSportivi;
 
-    // COSTRUTTORI
 
-    // 1. Costruttore vuoto obbligatorio
     protected ProfiloAtleta() {
     }
 
-    // 2. Costruttore per la creazione
     public ProfiloAtleta(String disciplinaPraticata, String livelloEsperienza, String obiettiviSportivi) {
         this.disciplinaPraticata = disciplinaPraticata;
         this.livelloEsperienza = livelloEsperienza;
         this.obiettiviSportivi = obiettiviSportivi;
     }
 
-    // METODI DI BUSINESS
 
     public void aggiornaObiettivi(String nuoviObiettivi) {
         this.obiettiviSportivi = nuoviObiettivi;
@@ -42,7 +38,6 @@ public class ProfiloAtleta {
         this.disciplinaPraticata = nuovaDisciplina;
     }
 
-    // GETTER E SETTER
 
     public String getDisciplinaPraticata() {
         return disciplinaPraticata; }

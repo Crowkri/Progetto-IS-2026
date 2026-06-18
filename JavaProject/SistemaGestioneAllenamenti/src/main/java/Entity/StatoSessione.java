@@ -10,7 +10,7 @@ public enum StatoSessione {
         if (stato == null) {
             return false;
         }
-        // Confronta il nome della costante enum (es. "ASSEGNATA") con la stringa ricevuta
+        // Confronta il nome della costante enum con la stringa ricevuta
         return this.name().equalsIgnoreCase(stato.trim());
     }
 }

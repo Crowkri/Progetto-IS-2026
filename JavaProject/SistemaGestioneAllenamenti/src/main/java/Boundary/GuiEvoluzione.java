@@ -14,7 +14,7 @@ public class GuiEvoluzione extends JFrame {
 
     private JPanel mainPanel;
     private JLabel lblTitolo;
-    private JPanel pnlGrafico; // Contenitore del grafico
+    private JPanel pnlGrafico;
     private JLabel lblStatistiche;
     private JButton btnChiudi;
 
@@ -22,7 +22,6 @@ public class GuiEvoluzione extends JFrame {
     private Map<Date, Integer> datiEvoluzione;
 
     public GuiEvoluzione(Atleta atleta, Map<Date, Integer> datiEvoluzione) {
-        // Inizializza la grafica (risolve il problema del null)
         $$$setupUI$$$();
 
         this.atleta = atleta;
@@ -52,9 +51,9 @@ public class GuiEvoluzione extends JFrame {
         btnChiudi.addActionListener(e -> this.dispose());
     }
 
-    // --- LOGICA DI DISEGNO DEL GRAFICO (PURO JAVA) ---
+    // Per disegno grafico
     private void disegnaGraficoCustom() {
-        pnlGrafico.removeAll(); // Pulisce il pannello
+        pnlGrafico.removeAll();
         pnlGrafico.setLayout(new BorderLayout());
 
         JPanel chartPanel = new JPanel() {
@@ -64,7 +63,7 @@ public class GuiEvoluzione extends JFrame {
                 if (datiEvoluzione == null || datiEvoluzione.isEmpty()) return;
 
                 Graphics2D g2 = (Graphics2D) g;
-                // Attiva l'antialiasing per rendere le linee morbide
+                // L'antialiasing
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
                 int padding = 50;
@@ -115,7 +114,7 @@ public class GuiEvoluzione extends JFrame {
             }
         };
 
-        chartPanel.setBackground(Color.WHITE); // Sfondo bianco per far risaltare il grafico
+        chartPanel.setBackground(Color.WHITE);
         pnlGrafico.add(chartPanel, BorderLayout.CENTER);
         pnlGrafico.revalidate();
         pnlGrafico.repaint();

@@ -1,6 +1,6 @@
 package Boundary;
 
-import Entity.AppSport;
+import Control.AppSport;
 import Control.GestoreUtenti;
 import Entity.Allenatore;
 import Entity.Atleta;
@@ -22,10 +22,8 @@ public class FormLogin {
     private JButton btnLogin;
     private JLabel lblEsito;
 
-    // Riferimento al Use Case Controller
     private GestoreUtenti gestoreUtenti;
 
-    // Il costruttore ora richiede il GestoreUtenti
     public FormLogin(GestoreUtenti gestoreUtenti) {
         this.gestoreUtenti = gestoreUtenti;
 
@@ -41,7 +39,7 @@ public class FormLogin {
         String email = txtEmail.getText().trim();
         String password = new String(txtPassword.getPassword());
 
-        // 1. Validazione formale della Boundary
+        // Validazione formale della Boundary
         if (email.isEmpty() || password.isEmpty()) {
             lblEsito.setText("Errore: compila tutti i campi.");
             lblEsito.setForeground(Color.RED);
@@ -49,11 +47,10 @@ public class FormLogin {
         }
 
         try {
-            // 2. Delega l'autenticazione al controller
+            // Delega l'autenticazione al controller
             Utente utenteLoggato = gestoreUtenti.autenticaUtente(email, password);
 
             if (utenteLoggato != null) {
-                // Il login ha avuto successo. Controlliamo il tipo per la UX
                 if (utenteLoggato instanceof Atleta) {
                     lblEsito.setText("Login Atleta riuscito! Benvenuto " + utenteLoggato.getNome());
                     lblEsito.setForeground(Color.GREEN);
@@ -99,11 +96,9 @@ public class FormLogin {
     public static void main(String[] args) {
         JFrame frame = new JFrame("Accesso Sistema Allenamenti");
 
-        // Configurazione dell'architettura per il test autonomo della schermata
         AppSport facade = new AppSport();
         GestoreUtenti controller = new GestoreUtenti(facade);
 
-        // Passiamo il controller reale al modulo di login
         frame.setContentPane(new FormLogin(controller).contentPane);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
