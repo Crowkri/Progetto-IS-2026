@@ -5,6 +5,7 @@ import Control.GestoreUtenti;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -89,9 +90,10 @@ public class FormRegistrazione {
                 }
 
                 gestoreUtenti.registraAtleta(nome, cognome, email, password, disciplina, codice);
-                lblEsito.setText("Registrazione Atleta completata!");
-                lblEsito.setForeground(Color.GREEN);
-                pulisciCampi();
+
+                // Mostra popup di successo e vai al login
+                JOptionPane.showMessageDialog(contentPane, "Registrazione Atleta completata con successo!\nVerrai reindirizzato al login.", "Successo", JOptionPane.INFORMATION_MESSAGE);
+                apriSchermataLogin();
 
             } else if (ruolo.equals("Allenatore")) {
                 if (codice.isEmpty()) {
@@ -102,21 +104,35 @@ public class FormRegistrazione {
 
                 // Controllo inesistenza codice Allenatore
                 if (gestoreUtenti.esisteCodiceAllenatore(codice)) {
-                    lblEsito.setText("Errore: Questo codice è già in uso da un altro allenatore.");
+                    lblEsito.setText("Errore: Questo codice è già in uso.");
                     lblEsito.setForeground(Color.RED);
                     return;
                 }
 
                 gestoreUtenti.registraAllenatore(nome, cognome, email, password, disciplina, codice);
-                lblEsito.setText("Registrazione Allenatore completata!");
-                lblEsito.setForeground(Color.GREEN);
-                pulisciCampi();
+
+                // Mostra popup di successo e vai al login
+                JOptionPane.showMessageDialog(contentPane, "Registrazione Allenatore completata con successo!\nVerrai reindirizzato al login.", "Successo", JOptionPane.INFORMATION_MESSAGE);
+                apriSchermataLogin();
             }
 
         } catch (Exception ex) {
             lblEsito.setText("Errore: " + ex.getMessage());
             lblEsito.setForeground(Color.RED);
         }
+    }
+
+    // NUOVO METODO PER APRIRE IL LOGIN E CHIUDERE LA REGISTRAZIONE
+    private void apriSchermataLogin() {
+        JFrame frameLogin = new JFrame("Accesso Sistema Allenamenti");
+        frameLogin.setContentPane(new FormLogin(gestoreUtenti).$$$getRootComponent$$$());
+        frameLogin.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frameLogin.pack();
+        frameLogin.setLocationRelativeTo(null); // Centra la finestra
+        frameLogin.setVisible(true);
+
+        // Chiude la finestra di registrazione attuale
+        SwingUtilities.getWindowAncestor(contentPane).dispose();
     }
 
     private void pulisciCampi() {
@@ -126,7 +142,6 @@ public class FormRegistrazione {
         txtPassword.setText("");
         txtDisciplina.setText("");
         txtCodiceAssociazione.setText("");
-        // Ripristina anche la selezione della combo
         cmbRuolo.setSelectedIndex(0);
     }
 
