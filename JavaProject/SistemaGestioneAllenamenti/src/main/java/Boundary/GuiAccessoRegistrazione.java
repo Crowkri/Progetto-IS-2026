@@ -95,21 +95,6 @@ public class GuiAccessoRegistrazione {
         return contentPane;
     }
 
-    // MAIN UFFICIALE DI PARTENZA DELL'APP
-    public static void main(String[] args) {
-        // 1. Inizializzazione dell'architettura di base (Facade e Controller)
-        AppSport facade = new AppSport();
-        GestoreUtenti controller = new GestoreUtenti(facade);
-
-        // 2. Lancio della prima interfaccia
-        JFrame frame = new JFrame("Benvenuto - Sistema Allenamenti");
-        frame.setContentPane(new GuiAccessoRegistrazione(controller).getContentPane());
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(350, 250); // Dimensione fissa per renderla più carina
-        frame.setLocationRelativeTo(null); // Centra la finestra sullo schermo
-        frame.setVisible(true);
-    }
-
     {
 
         $$$setupUI$$$();

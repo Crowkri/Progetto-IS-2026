@@ -1,9 +1,11 @@
 package Boundary;
 
 import Control.GestoreUtenti;
+import Entity.Allenatore;
 import Entity.Atleta;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.Field;
@@ -23,6 +25,7 @@ class FormLoginTest {
 
     @BeforeEach
     void setUp() throws Exception {
+        // Mock del Controller (GestoreUtenti)
         gestoreUtentiMock = mock(GestoreUtenti.class);
         formLogin = new FormLogin(gestoreUtentiMock);
 
@@ -31,12 +34,13 @@ class FormLoginTest {
         contentPaneField.setAccessible(true);
         JPanel contentPane = (JPanel) contentPaneField.get(formLogin);
 
-        // Inizializzazione gerarchia Swing agganciando il contentPane al frame finto
+        // Inizializzazione gerarchia Swing agganciando il contentPane a un frame fittizio.
+        // Questo previene una NullPointerException quando il FormLogin invoca SwingUtilities.getWindowAncestor()
         JFrame dummyFrame = new JFrame();
         dummyFrame.add(contentPane);
         dummyFrame.pack();
 
-        // Estrazione campi privati tramite Reflection
+        // Estrazione campi privati tramite Reflection per la manipolazione nei test
         Field emailField = FormLogin.class.getDeclaredField("txtEmail");
         emailField.setAccessible(true);
         txtEmail = (JTextField) emailField.get(formLogin);
@@ -57,57 +61,71 @@ class FormLoginTest {
     }
 
     @Test
-    void testCase1_TuttiInputValidi() throws Exception {
-        txtPassword.setText("Password1!");
-        txtEmail.setText("mario.rossi@email.it");
+    void testLoginAtleta_Successo() throws Exception {
+        txtEmail.setText("atleta@email.it");
+        txtPassword.setText("Password123!");
 
+        // Setup del mock per simulare il ritorno di un'entità Atleta
         Atleta atletaFinto = mock(Atleta.class);
         when(atletaFinto.getNome()).thenReturn("Mario");
-        when(gestoreUtentiMock.autenticaUtente("mario.rossi@email.it", "Password1!")).thenReturn(atletaFinto);
+        when(gestoreUtentiMock.autenticaUtente("atleta@email.it", "Password123!")).thenReturn(atletaFinto);
 
         invocaEffettuaLogin();
 
-        assertEquals("Login Atleta ricevuto!", lblEsito.getText().replace(" riuscito!", " ricevuto!"));
+        // Asserzioni (Basate sul testo finale impostato nel tuo FormLogin)
+        assertEquals("Login Atleta riuscito!", lblEsito.getText());
         assertEquals(Color.GREEN, lblEsito.getForeground());
     }
 
     @Test
-    void testCase2_PasswordTroppoBreve() throws Exception {
-        txtPassword.setText("Pass1");
-        txtEmail.setText("mario.rossi@email.it");
+    void testLoginAllenatore_Successo() throws Exception {
+        txtEmail.setText("coach@email.it");
+        txtPassword.setText("CoachPass!");
+
+        // Setup del mock per simulare il ritorno di un'entità Allenatore
+        Allenatore allenatoreFinto = mock(Allenatore.class);
+        when(allenatoreFinto.getNome()).thenReturn("Luigi");
+        when(gestoreUtentiMock.autenticaUtente("coach@email.it", "CoachPass!")).thenReturn(allenatoreFinto);
 
         invocaEffettuaLogin();
 
-        assertNotNull(lblEsito.getText());
-        assertFalse(lblEsito.getText().isEmpty());
+        // Asserzioni
+        assertEquals("Login Allenatore riuscito!", lblEsito.getText());
+        assertEquals(Color.GREEN, lblEsito.getForeground());
     }
 
     @Test
-    void testCase3_PasswordVuota() throws Exception {
+    void testCredenzialiErrate_RitornaNull() throws Exception {
+        txtEmail.setText("sbagliata@email.it");
+        txtPassword.setText("Errata!");
+
+        // Simuliamo che il Controller non trovi l'utente
+        when(gestoreUtentiMock.autenticaUtente(anyString(), anyString())).thenReturn(null);
+
+        invocaEffettuaLogin();
+
+        assertEquals("Errore: Credenziali errate.", lblEsito.getText());
+        assertEquals(Color.RED, lblEsito.getForeground());
+    }
+
+    @Test
+    void testCampiVuoti_SoloPassword() throws Exception {
+        txtEmail.setText("mario.rossi@email.it");
         txtPassword.setText("");
-        txtEmail.setText("mario.rossi@email.it");
 
         invocaEffettuaLogin();
 
         assertEquals("Errore: compila tutti i campi.", lblEsito.getText());
         assertEquals(Color.RED, lblEsito.getForeground());
+
+        // Verifica che il Controller non venga mai interpellato se la validazione Boundary fallisce
         verifyNoInteractions(gestoreUtentiMock);
     }
 
     @Test
-    void testCase4_EmailSenzaChiocciola() throws Exception {
-        txtPassword.setText("Password1!");
-        txtEmail.setText("mariorossiemailit");
-
-        invocaEffettuaLogin();
-
-        assertNotNull(lblEsito.getText());
-    }
-
-    @Test
-    void testCase5_EmailVuota() throws Exception {
-        txtPassword.setText("Password1!");
+    void testCampiVuoti_SoloEmail() throws Exception {
         txtEmail.setText("");
+        txtPassword.setText("Password123!");
 
         invocaEffettuaLogin();
 
@@ -115,4 +133,6 @@ class FormLoginTest {
         assertEquals(Color.RED, lblEsito.getForeground());
         verifyNoInteractions(gestoreUtentiMock);
     }
+
+
 }
